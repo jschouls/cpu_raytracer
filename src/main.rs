@@ -3,15 +3,20 @@
 extern crate sdl2;
 
 use sdl2::event::Event;
+use sdl2::gfx::primitives::DrawRenderer;
 use sdl2::pixels;
-use sdl2::rect::Point;
+
+mod vector;
+use vector::Vec2;
 
 const SCREEN_WIDTH: u32 = 800;
 const SCREEN_HEIGHT: u32 = 600;
-
+#[allow(dead_code)]
 fn main() -> Result<(), String> {
-    // test
     println!("Hello, world!");
+
+    // test vec2
+    let center = Vec2(0.0, 0.0);
 
     let sdl_context = sdl2::init()?;
     let video_subsys = sdl_context.video()?;
@@ -23,7 +28,6 @@ fn main() -> Result<(), String> {
         .map_err(|e| e.to_string())?;
 
     let mut canvas = window.into_canvas().build().map_err(|e| e.to_string())?;
-
     canvas.set_draw_color(pixels::Color::RGB(0, 0, 0));
     canvas.clear();
     canvas.present();
@@ -36,9 +40,8 @@ fn main() -> Result<(), String> {
                 Event::Quit { .. } => break 'main,
 
                 Event::MouseButtonDown { x, y, .. } => {
-                    canvas.set_draw_color(pixels::Color::RGB(255, 255, 255));
-                    let p = Point::new(x, y);
-                    canvas.draw_point(p)?;
+                    let color = pixels::Color::RGBA(255, 255, 255, 255);
+                    canvas.pixel(x as i16, y as i16, color)?;
                     println!("mouse btn down at ({},{})", x, y);
                     canvas.present();
                 }

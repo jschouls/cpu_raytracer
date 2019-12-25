@@ -7,7 +7,9 @@ use sdl2::gfx::primitives::DrawRenderer;
 use sdl2::pixels;
 
 mod vector;
-use vector::Vec2;
+use vector::Vec3;
+
+mod camera;
 
 const SCREEN_WIDTH: u32 = 800;
 const SCREEN_HEIGHT: u32 = 600;
@@ -16,7 +18,10 @@ fn main() -> Result<(), String> {
     println!("Hello, world!");
 
     // test vec2
-    let center = Vec2(0.0, 0.0);
+
+    let cam = camera::Camera::set(Vec3::zero(), Vec3(0.0, 0.0, -1.0), 0.8);
+
+    println!("Camera: {:?}", cam);
 
     let sdl_context = sdl2::init()?;
     let video_subsys = sdl_context.video()?;

@@ -1,10 +1,10 @@
 use std::ops;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Copy, Clone)]
 pub struct Vec2(pub f32, pub f32);
 
-#[derive(Debug, PartialEq)]
-pub struct Vec3(pub f32, pub f32, f32);
+#[derive(Debug, PartialEq, Copy, Clone)]
+pub struct Vec3(pub f32, pub f32, pub f32);
 
 trait Vector {
     fn squared(&self) -> f32;
@@ -20,12 +20,20 @@ trait Vector {
  *  Vector 2 implementations
 ***/
 impl Vec2 {
-    fn x(&self) -> f32 {
+    pub fn x(&self) -> f32 {
         self.0
     }
 
-    fn y(&self) -> f32 {
+    pub fn y(&self) -> f32 {
         self.1
+    }
+
+    pub fn zero() -> Self {
+        Self(0.0, 0.0)
+    }
+
+    pub fn up() -> Self {
+        Self(0.0, 1.0)
     }
 }
 
@@ -94,24 +102,32 @@ impl ops::Mul<f32> for Vec2 {
  *  Vector 3 implementations
 ***/
 impl Vec3 {
-    fn x(&self) -> f32 {
+    pub fn x(&self) -> f32 {
         self.0
     }
 
-    fn y(&self) -> f32 {
+    pub fn y(&self) -> f32 {
         self.1
     }
 
-    fn z(&self) -> f32 {
+    pub fn z(&self) -> f32 {
         self.2
     }
 
-    fn cross(&self, other: Vec3) -> Self {
+    pub fn cross(&self, other: Vec3) -> Self {
         Self(
             (self.1 * other.2) - (self.2 * other.1),
             (self.2 * other.0) - (self.0 * other.2),
             (self.0 * other.1) - (self.1 * other.0),
         )
+    }
+
+    pub fn zero() -> Self {
+        Self(0.0, 0.0, 0.0)
+    }
+
+    pub fn up() -> Self {
+        Self(0.0, 1.0, 0.0)
     }
 }
 

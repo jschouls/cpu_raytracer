@@ -129,6 +129,11 @@ impl Vec3 {
     pub fn up() -> Self {
         Self(0.0, 1.0, 0.0)
     }
+
+    // could not call from trait?
+    pub fn normalize(v: Self) -> Self {
+        v.normalize()
+    }
 }
 
 impl Vector for Vec3 {

@@ -66,10 +66,10 @@ impl Camera {
         //x.normalize();
 
         Ray {
-            is_intersected: false,
+            is_intersected: super::IntersectData::None,
             origin: self.position,
             direction: Vec3::normalize(vp_point - self.position),
-            travelDistance: f32::MAX,
+            travel_distance: f32::MAX,
         }
     }
 }

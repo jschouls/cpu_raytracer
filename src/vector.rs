@@ -134,6 +134,10 @@ impl Vec3 {
     pub fn normalize(v: Self) -> Self {
         v.normalize()
     }
+
+    pub fn dot(v1: Self, v2: Self) -> f32 {
+        (v1.0 * v2.0 + v1.1 * v2.1 + v1.2 * v2.2)
+    }
 }
 
 impl Vector for Vec3 {

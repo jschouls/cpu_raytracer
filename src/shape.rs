@@ -20,7 +20,7 @@ pub trait Shape {
 pub struct Plane {
     normal: Vec3,
     distance: f32,
-    material: Rc<Material>,
+    material: Rc<Material>, // Reference count
 }
 
 impl Plane {

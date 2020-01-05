@@ -1,19 +1,18 @@
 #![warn(clippy::all)]
 
-use std::num;
-
 extern crate sdl2;
 
 use sdl2::event::Event;
 use sdl2::gfx::primitives::DrawRenderer;
 use sdl2::keyboard::Keycode;
 use sdl2::pixels;
-use std::rc::Rc;
-use std::time::{Duration, Instant};
+use std::time::Instant;
 
 mod camera;
+mod light;
 mod material;
 mod ray;
+mod scene;
 mod shape;
 mod vector;
 
@@ -21,8 +20,8 @@ use camera::Camera;
 use material::Material;
 use ray::IntersectData;
 use ray::Ray;
-use shape::{Plane, Shape, Sphere};
 use vector::Vec3;
+use vector::Vector;
 
 pub const SCREEN_WIDTH: u32 = 800;
 pub const SCREEN_HEIGHT: u32 = 600;
@@ -32,8 +31,6 @@ pub const MAX_RAY_DEPTH: u16 = 8;
 #[allow(dead_code)]
 fn main() -> Result<(), String> {
     println!("Hello, world!");
-
-    // test vec2
 
     let sdl_context = sdl2::init()?;
     let video_subsys = sdl_context.video()?;
@@ -51,26 +48,13 @@ fn main() -> Result<(), String> {
 
     let mut events = sdl_context.event_pump()?;
 
-    let mut is_rendering: bool = false;
+    //let mut is_rendering: bool = false;
 
     // Create scene
     let cam = Camera::set(Vec3::zero(), Vec3(0.0, 0.0, -1.0), 0.8);
 
-    // Reference counter because this can be shared with others and rays.
-    let floorMaterial = Rc::new(Material {
-        color: pixels::Color::RGB(255, 255, 255),
-        reflection: 0.0,
-        refraction: 0.0,
-    });
-
-    //let floor = ;
-
-    let scene: Vec<Box<dyn Shape>> = vec![
-        Box::new(shape::Plane::new(Vec3::up(), 0.5, &floorMaterial)),
-        //Box::new(shape::Plane::new(Vec3(0.0, 0.0, 1.0), 20.0, &floorMaterial)),
-    ];
-
-    println!("floor ref count: {:?}", Rc::strong_count(&floorMaterial));
+    let scene = scene::create_scene();
+    //println!("floor ref count: {:?}", Rc::strong_count(&floorMaterial));
 
     'main: loop {
         for event in events.poll_iter() {
@@ -102,35 +86,50 @@ fn main() -> Result<(), String> {
 }
 
 fn render_canvas_line(
-    scene: &Vec<Box<dyn Shape>>,
-    mut canvas: &sdl2::render::Canvas<sdl2::video::Window>,
+    scene: &scene::Scene,
+    canvas: &sdl2::render::Canvas<sdl2::video::Window>,
     cam: &Camera,
     y: u32,
 ) {
     for x in 0..SCREEN_WIDTH {
-        //let r : &
         let mut r = cam.generate_ray(x as f32, y as f32);
         let color = raytrace(&scene, &mut r, 0);
         canvas.pixel(x as i16, y as i16, color);
     }
 }
 
-fn raytrace(scene: &Vec<Box<dyn Shape>>, ray: &mut Ray, mut depth: u16) -> pixels::Color {
-    let _color = pixels::Color::RGB(0, 0, 0);
+fn raytrace(scene: &scene::Scene, ray: &mut Ray, depth: u16) -> pixels::Color {
+    let mut _color = Vec3(0.0, 0.0, 0.0);
 
     // if it above the ray depth
     if depth >= MAX_RAY_DEPTH {
-        return _color;
+        return _color.to_color();
     }
 
     // check for intersection
-    for it in scene.iter() {
+    for it in scene.objects.iter() {
         it.intersect(ray);
     }
 
-    // is intersected? return material color for now.
-    match &ray.is_intersected {
-        IntersectData::Found { material, .. } => material.color,
-        _ => _color,
+    if let IntersectData::Found {
+        material: in_material,
+        normal: in_normal,
+    } = &ray.is_intersected
+    {
+        let mat_color = Vec3::from_color(in_material.color);
+        let _point_intersect: Vec3 = ray.origin + ray.direction * ray.travel_distance;
+        for _light in scene.lights.iter() {
+            // vector to point of intersection to light
+            let _to_light = _light.position - _point_intersect;
+            let _n_to_light = Vec3::normalize(_to_light);
+
+            let angle = Vec3::dot(*in_normal, _n_to_light);
+            if angle > 0.0 {
+                let length = _to_light.length();
+                let dist_an = _light.intensity / (length * length);
+                _color += mat_color * dist_an * angle;
+            }
+        }
     }
+    _color.to_color()
 }

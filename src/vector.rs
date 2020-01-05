@@ -1,3 +1,4 @@
+use sdl2::pixels::Color;
 use std::ops;
 
 #[derive(Debug, PartialEq, Copy, Clone)]
@@ -6,7 +7,7 @@ pub struct Vec2(pub f32, pub f32);
 #[derive(Debug, PartialEq, Copy, Clone)]
 pub struct Vec3(pub f32, pub f32, pub f32);
 
-trait Vector {
+pub trait Vector {
     fn squared(&self) -> f32;
     fn length(&self) -> f32 {
         self.squared().sqrt()
@@ -19,23 +20,7 @@ trait Vector {
 /***
  *  Vector 2 implementations
 ***/
-impl Vec2 {
-    pub fn x(&self) -> f32 {
-        self.0
-    }
-
-    pub fn y(&self) -> f32 {
-        self.1
-    }
-
-    pub fn zero() -> Self {
-        Self(0.0, 0.0)
-    }
-
-    pub fn up() -> Self {
-        Self(0.0, 1.0)
-    }
-}
+impl Vec2 {}
 
 impl Vector for Vec2 {
     fn squared(&self) -> f32 {
@@ -101,17 +86,17 @@ impl ops::Mul<f32> for Vec2 {
 /***
  *  Vector 3 implementations
 ***/
+
 impl Vec3 {
-    pub fn x(&self) -> f32 {
-        self.0
+    pub fn to_color(&self) -> Color {
+        let _r = clamp(self.0, 0.0, 255.0);
+        let _g = clamp(self.1, 0.0, 255.0);
+        let _b = clamp(self.2, 0.0, 255.0);
+        Color::RGB(_r as u8, _g as u8, _b as u8)
     }
 
-    pub fn y(&self) -> f32 {
-        self.1
-    }
-
-    pub fn z(&self) -> f32 {
-        self.2
+    pub fn from_color(color: Color) -> Self {
+        Vec3(color.r as f32, color.g as f32, color.b as f32)
     }
 
     pub fn cross(&self, other: Vec3) -> Self {
@@ -145,6 +130,10 @@ impl Vector for Vec3 {
         (self.0 * self.0 + self.1 * self.1 + self.2 * self.2)
     }
 
+    fn length(&self) -> f32 {
+        self.squared().sqrt()
+    }
+
     fn normalize(&self) -> Self {
         let length = self.length();
         Self(self.0 / length, self.1 / length, self.2 / length)
@@ -162,6 +151,16 @@ impl ops::Add for Vec3 {
 
     fn add(self, _rhs: Self) -> Self {
         Self {
+            0: self.0 + _rhs.0,
+            1: self.1 + _rhs.1,
+            2: self.2 + _rhs.2,
+        }
+    }
+}
+
+impl ops::AddAssign for Vec3 {
+    fn add_assign(&mut self, _rhs: Self) {
+        *self = Self {
             0: self.0 + _rhs.0,
             1: self.1 + _rhs.1,
             2: self.2 + _rhs.2,
@@ -192,6 +191,7 @@ impl ops::Mul<Vec3> for Vec3 {
         }
     }
 }
+
 // scalar mul
 impl ops::Mul<f32> for Vec3 {
     type Output = Self;
@@ -202,6 +202,17 @@ impl ops::Mul<f32> for Vec3 {
             1: self.1 * _rhs,
             2: self.2 * _rhs,
         }
+    }
+}
+
+// Helper functions
+fn clamp(value: f32, min: f32, max: f32) -> f32 {
+    if value > max {
+        max
+    } else if value < min {
+        min
+    } else {
+        value
     }
 }
 
@@ -309,6 +320,7 @@ mod unit_tests {
         assert_eq!(v_normalized.length(), 1.0);
     }
 
+    #[test]
     fn test_vector3_cross() {
         let a = Vec3(2.0, 3.0, 4.0);
         let b = Vec3(5.0, 6.0, 7.0);

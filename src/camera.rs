@@ -2,7 +2,7 @@ use crate::vector::Vec3;
 use crate::Ray;
 use std::f32;
 
-const CAMERA_SCREEN_SIZE: f32 = 1.0;
+const CAMERA_SCREEN_SIZE: f32 = 0.5;
 
 /**
  * viewPlane points
@@ -30,17 +30,19 @@ impl Camera {
         let world_up = Vec3(0.0, 1.0, 0.0);
         // Relative to direction (right hand side)
 
+        let look_direction = Vec3::normalize(_dir - _pos);
+
         let right = _dir.cross(world_up);
         //println!("right: {:?}", right);
 
-        let up = right.cross(_dir);
+        let up = right.cross(look_direction);
         //println!("Up: {:?}", up);
 
-        let center: Vec3 = _pos + (_dir * _plane_distance);
+        let center: Vec3 = _pos + (look_direction * _plane_distance);
 
         Camera {
             position: _pos,
-            direction: _dir,
+            direction: look_direction,
             vp: ViewPlane {
                 distance: _plane_distance,
                 p: [

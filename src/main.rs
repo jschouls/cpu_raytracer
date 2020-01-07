@@ -48,13 +48,10 @@ fn main() -> Result<(), String> {
 
     let mut events = sdl_context.event_pump()?;
 
-    //let mut is_rendering: bool = false;
-
     // Create scene
-    let cam = Camera::set(Vec3::zero(), Vec3(0.0, 0.0, -1.0), 0.8);
+    let mut cam = Camera::set(Vec3::zero(), Vec3(0.0, 0.0, -3.0), 0.5);
 
     let scene = scene::create_scene();
-    //println!("floor ref count: {:?}", Rc::strong_count(&floorMaterial));
 
     'main: loop {
         for event in events.poll_iter() {
@@ -67,14 +64,16 @@ fn main() -> Result<(), String> {
                 } => {
                     if keycode == Keycode::Escape {
                         break 'main;
+                    } else if keycode == Keycode::W {
+                        cam.position += cam.direction * 0.05;
+                        render_scene(&scene, &mut canvas, &cam);
+                    } else if keycode == Keycode::S {
+                        cam.position += cam.direction * -0.05;
+                        render_scene(&scene, &mut canvas, &cam);
+                    } else if keycode == Keycode::A {
+                    } else if keycode == Keycode::D {
                     } else if keycode == Keycode::Space {
-                        canvas.clear();
-                        let now = Instant::now();
-                        for y in 0..SCREEN_HEIGHT {
-                            render_canvas_line(&scene, &canvas, &cam, y);
-                        }
-                        canvas.present();
-                        println!("Finished rendering: {}", now.elapsed().as_millis());
+                        render_scene(&scene, &mut canvas, &cam);
                     }
                 }
                 _ => {}
@@ -83,6 +82,20 @@ fn main() -> Result<(), String> {
     }
 
     Ok(())
+}
+
+fn render_scene(
+    scene: &scene::Scene,
+    canvas: &mut sdl2::render::Canvas<sdl2::video::Window>,
+    cam: &Camera,
+) {
+    canvas.clear();
+    let now = Instant::now();
+    for y in 0..SCREEN_HEIGHT {
+        render_canvas_line(&scene, &canvas, &cam, y);
+    }
+    canvas.present();
+    println!("Finished rendering: {}", now.elapsed().as_millis());
 }
 
 fn render_canvas_line(

@@ -2,7 +2,9 @@ use crate::vector::Vec3;
 use crate::Ray;
 use std::f32;
 
-const CAMERA_SCREEN_SIZE: f32 = 0.5;
+// Ratio needs to change when resolution also change.
+const CAMERA_SCREEN_SIZE_HEIGHT: f32 = 0.3;
+const CAMERA_SCREEN_SIZE_WIDTH: f32 = 0.4;
 
 /**
  * viewPlane points
@@ -32,7 +34,7 @@ impl Camera {
 
         let look_direction = Vec3::normalize(_dir - _pos);
 
-        let right = _dir.cross(world_up);
+        let right = look_direction.cross(world_up);
         //println!("right: {:?}", right);
 
         let up = right.cross(look_direction);
@@ -46,10 +48,10 @@ impl Camera {
             vp: ViewPlane {
                 distance: _plane_distance,
                 p: [
-                    center - (right * CAMERA_SCREEN_SIZE) + (up * CAMERA_SCREEN_SIZE),
-                    center + (right * CAMERA_SCREEN_SIZE) + (up * CAMERA_SCREEN_SIZE),
-                    center + (right * CAMERA_SCREEN_SIZE) - (up * CAMERA_SCREEN_SIZE),
-                    center - (right * CAMERA_SCREEN_SIZE) - (up * CAMERA_SCREEN_SIZE),
+                    center - (right * CAMERA_SCREEN_SIZE_WIDTH) + (up * CAMERA_SCREEN_SIZE_HEIGHT),
+                    center + (right * CAMERA_SCREEN_SIZE_WIDTH) + (up * CAMERA_SCREEN_SIZE_HEIGHT),
+                    center + (right * CAMERA_SCREEN_SIZE_WIDTH) - (up * CAMERA_SCREEN_SIZE_HEIGHT),
+                    center - (right * CAMERA_SCREEN_SIZE_WIDTH) - (up * CAMERA_SCREEN_SIZE_HEIGHT),
                 ],
             },
         }

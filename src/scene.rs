@@ -1,13 +1,23 @@
 use super::light::{Light, LightType};
 use super::shape::{Plane, Shape, Sphere};
+use super::Camera;
 use super::Material;
+use super::Vec2;
 use super::Vec3;
 
 use std::rc::Rc;
 
+extern crate sdl2;
+
+use sdl2::pixels::Color;
+use sdl2::rect::Point;
+use sdl2::render::Canvas;
+use sdl2::video::Window;
+
 pub struct Scene {
     pub objects: Vec<Box<dyn Shape>>,
     pub lights: Vec<Light>,
+    pub camera: Camera,
 }
 
 // Create the scene.
@@ -16,13 +26,13 @@ pub fn create_scene() -> Scene {
 
     // Reference counter because this can be shared with others and rays.
     let floor_material = Rc::new(Material {
-        color: sdl2::pixels::Color::RGB(255, 255, 255),
+        color: Color::RGB(255, 255, 255),
         reflection: 0.0,
         refraction: 0.0,
     });
 
     let back_material = Rc::new(Material {
-        color: sdl2::pixels::Color::RGB(255, 0, 0),
+        color: Color::RGB(255, 0, 0),
         reflection: 0.0,
         refraction: 0.0,
     });
@@ -40,5 +50,97 @@ pub fn create_scene() -> Scene {
             intensity: 5.0,
             light_type: LightType::Point,
         }],
+        camera: Camera::set(Vec3::zero(), Vec3(0.0, 0.0, -3.0), 0.5),
     }
+}
+
+/// Debug window
+// Drawing rect
+const DRAW_COORDS_MIN_XY: Vec2 = Vec2(-5.0, -5.0);
+const DRAW_COORDS_MAX_XY: Vec2 = Vec2(5.0, 5.0);
+
+// To 2d scaling
+fn scale_and_to_point(_vec: Vec2) -> Point {
+    let screen_width = super::SCREEN_WIDTH as f32;
+    let screen_height = super::SCREEN_HEIGHT as f32;
+
+    let totalx = DRAW_COORDS_MAX_XY.0 - DRAW_COORDS_MIN_XY.0;
+    let totaly = DRAW_COORDS_MAX_XY.1 - DRAW_COORDS_MIN_XY.1;
+
+    let _x = ((_vec.0 - DRAW_COORDS_MIN_XY.0) / totalx) * screen_width;
+
+    let _y = ((_vec.1 - DRAW_COORDS_MIN_XY.1) / totaly) * screen_height;
+
+    Point::new(_x as i32, _y as i32)
+}
+
+fn draw_axis(_canvas: &mut Canvas<Window>) -> Result<(), String> {
+    // Draw axis
+    let startpoint = Point::new(20, 20);
+    let size = 60;
+    _canvas.set_draw_color(Color::RGB(0, 0, 255));
+    _canvas.draw_line(startpoint, Point::new(startpoint.x(), size))?;
+    _canvas.set_draw_color(Color::RGB(255, 0, 0));
+    _canvas.draw_line(startpoint, Point::new(size, startpoint.y()))?;
+
+    Ok(())
+}
+
+pub fn draw_line(_canvas: &mut Canvas<Window>, _start: Vec2, _end: Vec2) -> Result<(), String> {
+    let _a = scale_and_to_point(_start);
+    let _b = scale_and_to_point(_end);
+
+    _canvas.set_draw_color(Color::RGB(255, 255, 255));
+    _canvas.draw_line(_a, _b)?;
+
+    Ok(())
+}
+
+fn draw_camera(_camera: &Camera, _canvas: &mut Canvas<Window>) -> Result<(), String> {
+    let dir_p0 = (_camera.vp.p[0] - _camera.position) * 100.0;
+    draw_line(
+        _canvas,
+        Vec2(_camera.position.0, _camera.position.2),
+        Vec2(dir_p0.0, dir_p0.2),
+    )?;
+
+    let dir_p1 = (_camera.vp.p[1] - _camera.position) * 100.0;
+
+    draw_line(
+        _canvas,
+        Vec2(_camera.position.0, _camera.position.2),
+        Vec2(dir_p1.0, dir_p1.2),
+    )?;
+
+    draw_line(
+        _canvas,
+        Vec2(_camera.vp.p[0].0, _camera.vp.p[0].2),
+        Vec2(_camera.vp.p[1].0, _camera.vp.p[1].2),
+    )?;
+
+    let direction = _camera.direction * (_camera.vp.distance * 1.5);
+    _canvas.set_draw_color(Color::RGB(0, 255, 0));
+    draw_line(
+        _canvas,
+        Vec2(_camera.position.0, _camera.position.2),
+        Vec2(direction.0, direction.2),
+    )?;
+
+    Ok(())
+}
+
+pub fn draw_debug_scene(_scene: &Scene, _canvas: &mut Canvas<Window>) -> Result<(), String> {
+    _canvas.set_draw_color(Color::RGB(0, 0, 0));
+    _canvas.clear();
+
+    draw_camera(&_scene.camera, _canvas)?;
+
+    for it in _scene.objects.iter() {
+        it.draw2D(_canvas)?;
+    }
+
+    draw_axis(_canvas)?;
+    _canvas.present();
+
+    Ok(())
 }

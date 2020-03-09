@@ -1,8 +1,14 @@
 use super::material::Material;
 use super::ray::IntersectData;
 use super::ray::Ray;
+use super::scene::draw_line;
+use super::vector::Vec2;
 use super::vector::Vec3;
-use sdl2::pixels;
+
+use sdl2::pixels::Color;
+use sdl2::render::Canvas;
+use sdl2::video::Window;
+
 use std::f32;
 use std::rc::Rc;
 
@@ -10,9 +16,13 @@ pub trait Shape {
     fn intersect(&self, ray: &mut Ray);
 
     // Default impl
-    fn get_color(&self, point_intersect: Vec3) -> pixels::Color {
+    fn get_color(&self, _point_intersect: Vec3) -> Color {
         // Default black color
-        pixels::Color::RGB(0, 0, 0)
+        Color::RGB(0, 0, 0)
+    }
+
+    fn draw2D(&self, _canvas: &mut Canvas<Window>) -> Result<(), String> {
+        Ok(())
     }
 }
 
@@ -47,17 +57,17 @@ impl Shape for Plane {
         }
     }
 
-    fn get_color(&self, point_intersect: Vec3) -> pixels::Color {
-        pixels::Color::RGB(0, 0, 0)
+    fn get_color(&self, _point_intersect: Vec3) -> Color {
+        Color::RGB(0, 0, 0)
     }
 }
 
 // Sphere
 
 pub struct Sphere {
-    position: Vec3,
-    radius: f32,
-    material: Rc<Material>,
+    pub position: Vec3,
+    pub radius: f32,
+    pub material: Rc<Material>,
 }
 
 impl Sphere {
@@ -101,5 +111,29 @@ impl Shape for Sphere {
             };
             ray.travel_distance = _t;
         }
+    }
+
+    #[cfg(feature = "draw-debugger")]
+    fn draw2D(&self, _canvas: &mut Canvas<Window>) -> Result<(), String> {
+        let mut p1 = Vec2(
+            self.radius * 0.0 + self.position.0,
+            self.radius * 1.0 + self.position.2,
+        );
+
+        let mut p2 = Vec2(
+            self.radius * 0.0 + self.position.0,
+            self.radius * 1.0 + self.position.2,
+        );
+
+        let res = 72;
+        for i in 1..res {
+            let rad = (i as f32 * 5.0) * std::f32::consts::PI / 180.0;
+            p2.0 = self.radius * rad.sin() + self.position.0; // x
+            p2.1 = self.radius * rad.cos() + self.position.2; // z
+            draw_line(_canvas, p1, p2)?;
+            p1 = p2;
+        }
+
+        Ok(())
     }
 }

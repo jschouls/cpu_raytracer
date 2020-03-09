@@ -1,11 +1,12 @@
 #![warn(clippy::all)]
-
 extern crate sdl2;
 
 use sdl2::event::Event;
 use sdl2::gfx::primitives::DrawRenderer;
 use sdl2::keyboard::Keycode;
-use sdl2::pixels;
+use sdl2::pixels::Color;
+use sdl2::render::Canvas;
+use sdl2::video::Window;
 use std::time::Instant;
 
 mod camera;
@@ -20,12 +21,12 @@ use camera::Camera;
 use material::Material;
 use ray::IntersectData;
 use ray::Ray;
+use vector::Vec2;
 use vector::Vec3;
 use vector::Vector;
 
 pub const SCREEN_WIDTH: u32 = 800;
 pub const SCREEN_HEIGHT: u32 = 600;
-
 pub const MAX_RAY_DEPTH: u16 = 8;
 
 #[allow(dead_code)]
@@ -42,16 +43,36 @@ fn main() -> Result<(), String> {
         .map_err(|e| e.to_string())?;
 
     let mut canvas = window.into_canvas().build().map_err(|e| e.to_string())?;
-    canvas.set_draw_color(pixels::Color::RGB(0, 0, 0));
+    canvas.set_draw_color(Color::RGB(0, 0, 0));
     canvas.clear();
     canvas.present();
 
     let mut events = sdl_context.event_pump()?;
 
-    // Create scene
-    let mut cam = Camera::set(Vec3::zero(), Vec3(0.0, 0.0, -3.0), 0.5);
+    let mut scene = scene::create_scene();
 
-    let scene = scene::create_scene();
+    // if feature debug screen is active
+    // Debug windows, feature can be enabled or not. So canvas is an option
+    let mut _debug_canvas = None;
+    if cfg!(feature = "draw-debugger") {
+        println!("Debugger constructing:");
+
+        let debug_window = video_subsys
+            .window("Debugger", SCREEN_WIDTH, SCREEN_HEIGHT)
+            .position_centered()
+            .opengl()
+            .build()
+            .map_err(|e| e.to_string())?;
+
+        _debug_canvas = Some(
+            debug_window
+                .into_canvas()
+                .build()
+                .map_err(|e| e.to_string())?,
+        );
+
+        scene::draw_debug_scene(&scene, _debug_canvas.as_mut().unwrap())?;
+    }
 
     'main: loop {
         for event in events.poll_iter() {
@@ -65,15 +86,19 @@ fn main() -> Result<(), String> {
                     if keycode == Keycode::Escape {
                         break 'main;
                     } else if keycode == Keycode::W {
-                        cam.position += cam.direction * 0.05;
-                        render_scene(&scene, &mut canvas, &cam);
+                        scene.camera.position += scene.camera.direction * 0.05;
+                    //render_scene(&scene, &mut canvas, &scene.camera);
                     } else if keycode == Keycode::S {
-                        cam.position += cam.direction * -0.05;
-                        render_scene(&scene, &mut canvas, &cam);
-                    } else if keycode == Keycode::A {
-                    } else if keycode == Keycode::D {
+                        scene.camera.position += scene.camera.direction * -0.05;
+                    //render_scene(&scene, &mut canvas, &scene.camera);
+                    // } else if keycode == Keycode::A {
+                    // } else if keycode == Keycode::D {
                     } else if keycode == Keycode::Space {
-                        render_scene(&scene, &mut canvas, &cam);
+                    }
+
+                    render_scene(&scene, &mut canvas, &scene.camera);
+                    if render_debug_screen {
+                        scene::draw_debug_scene(&scene, _debug_canvas.as_mut().unwrap())?;
                     }
                 }
                 _ => {}
@@ -84,11 +109,7 @@ fn main() -> Result<(), String> {
     Ok(())
 }
 
-fn render_scene(
-    scene: &scene::Scene,
-    canvas: &mut sdl2::render::Canvas<sdl2::video::Window>,
-    cam: &Camera,
-) {
+fn render_scene(scene: &scene::Scene, canvas: &mut Canvas<Window>, cam: &Camera) {
     canvas.clear();
     let now = Instant::now();
     for y in 0..SCREEN_HEIGHT {
@@ -98,12 +119,7 @@ fn render_scene(
     println!("Finished rendering: {}", now.elapsed().as_millis());
 }
 
-fn render_canvas_line(
-    scene: &scene::Scene,
-    canvas: &sdl2::render::Canvas<sdl2::video::Window>,
-    cam: &Camera,
-    y: u32,
-) {
+fn render_canvas_line(scene: &scene::Scene, canvas: &Canvas<Window>, cam: &Camera, y: u32) {
     for x in 0..SCREEN_WIDTH {
         let mut r = cam.generate_ray(x as f32, y as f32);
         let color = raytrace(&scene, &mut r, 0);
@@ -111,7 +127,7 @@ fn render_canvas_line(
     }
 }
 
-fn raytrace(scene: &scene::Scene, ray: &mut Ray, depth: u16) -> pixels::Color {
+fn raytrace(scene: &scene::Scene, ray: &mut Ray, depth: u16) -> Color {
     let mut _color = Vec3(0.0, 0.0, 0.0);
 
     // if it above the ray depth

@@ -34,10 +34,12 @@ impl Camera {
 
         let look_direction = Vec3::normalize(_dir - _pos);
 
-        let right = look_direction.cross(world_up);
+        let right = Vec3::cross(look_direction, world_up);
+        // let right = look_direction.cross(world_up);
         //println!("right: {:?}", right);
 
-        let up = right.cross(look_direction);
+        let up = Vec3::cross(right, look_direction);
+        // let up = right.cross(look_direction);
         //println!("Up: {:?}", up);
 
         let center: Vec3 = _pos + (look_direction * _plane_distance);

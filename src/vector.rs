@@ -20,7 +20,11 @@ pub trait Vector {
 /***
  *  Vector 2 implementations
 ***/
-impl Vec2 {}
+impl Vec2 {
+    //fn to_vec3(&self) -> Vec3 {
+    //    Vec3(self.0, self.1, 0.0)
+    //}
+}
 
 impl Vector for Vec2 {
     fn squared(&self) -> f32 {
@@ -99,13 +103,13 @@ impl Vec3 {
         Vec3(color.r as f32, color.g as f32, color.b as f32)
     }
 
-    pub fn cross(&self, other: Vec3) -> Self {
-        Self(
-            (self.1 * other.2) - (self.2 * other.1),
-            (self.2 * other.0) - (self.0 * other.2),
-            (self.0 * other.1) - (self.1 * other.0),
-        )
-    }
+    // pub fn cross(&self, other: Vec3) -> Self {
+    //     Self(
+    //         (self.1 * other.2) - (self.2 * other.1),
+    //         (self.2 * other.0) - (self.0 * other.2),
+    //         (self.0 * other.1) - (self.1 * other.0),
+    //     )
+    // }
 
     pub fn zero() -> Self {
         Self(0.0, 0.0, 0.0)
@@ -122,6 +126,14 @@ impl Vec3 {
 
     pub fn dot(v1: Self, v2: Self) -> f32 {
         (v1.0 * v2.0 + v1.1 * v2.1 + v1.2 * v2.2)
+    }
+
+    pub fn cross(v1: Self, v2: Self) -> Self {
+        Self(
+            (v1.1 * v2.2) - (v1.2 * v2.1),
+            (v1.2 * v2.0) - (v1.0 * v2.2),
+            (v1.0 * v2.1) - (v1.1 * v2.0),
+        )
     }
 }
 
@@ -324,7 +336,7 @@ mod unit_tests {
     fn test_vector3_cross() {
         let a = Vec3(2.0, 3.0, 4.0);
         let b = Vec3(5.0, 6.0, 7.0);
-        let cross = a.cross(b);
+        let cross = Vec3::cross(a, b);
 
         assert_eq!(cross, Vec3(-3.0, 6.0, -3.0))
     }

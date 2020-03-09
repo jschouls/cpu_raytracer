@@ -20,6 +20,20 @@ pub struct ViewPlane {
     pub p: [Vec3; 4],
 }
 
+impl ViewPlane {
+    pub fn new(plane_distance: f32, center: Vec3, right: Vec3, up: Vec3) -> Self {
+        ViewPlane {
+            distance: plane_distance,
+            p: [
+                center - (right * CAMERA_SCREEN_SIZE_WIDTH) + (up * CAMERA_SCREEN_SIZE_HEIGHT),
+                center + (right * CAMERA_SCREEN_SIZE_WIDTH) + (up * CAMERA_SCREEN_SIZE_HEIGHT),
+                center + (right * CAMERA_SCREEN_SIZE_WIDTH) - (up * CAMERA_SCREEN_SIZE_HEIGHT),
+                center - (right * CAMERA_SCREEN_SIZE_WIDTH) - (up * CAMERA_SCREEN_SIZE_HEIGHT),
+            ],
+        }
+    }
+}
+
 #[derive(Debug)]
 pub struct Camera {
     pub position: Vec3,
@@ -47,16 +61,22 @@ impl Camera {
         Camera {
             position: _pos,
             direction: look_direction,
-            vp: ViewPlane {
-                distance: _plane_distance,
-                p: [
-                    center - (right * CAMERA_SCREEN_SIZE_WIDTH) + (up * CAMERA_SCREEN_SIZE_HEIGHT),
-                    center + (right * CAMERA_SCREEN_SIZE_WIDTH) + (up * CAMERA_SCREEN_SIZE_HEIGHT),
-                    center + (right * CAMERA_SCREEN_SIZE_WIDTH) - (up * CAMERA_SCREEN_SIZE_HEIGHT),
-                    center - (right * CAMERA_SCREEN_SIZE_WIDTH) - (up * CAMERA_SCREEN_SIZE_HEIGHT),
-                ],
-            },
+            vp: ViewPlane::new(_plane_distance, center, right, up),
         }
+    }
+
+    pub fn move_direction(&mut self, delta: Vec3) {
+        self.position += delta;
+        self.direction = Vec3::normalize(self.direction - self.position);
+        self.update();
+    }
+
+    pub fn update(&mut self) {
+        let right = Vec3::cross(self.direction, Vec3::up());
+        let up = Vec3::cross(right, self.direction);
+        let center = self.position + (self.direction * self.vp.distance);
+
+        self.vp = ViewPlane::new(self.vp.distance, center, right, up)
     }
 
     pub fn generate_ray(&self, x: f32, y: f32) -> Ray {

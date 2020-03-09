@@ -54,7 +54,9 @@ fn main() -> Result<(), String> {
     // if feature debug screen is active
     // Debug windows, feature can be enabled or not. So canvas is an option
     let mut _debug_canvas = None;
-    if cfg!(feature = "draw-debugger") {
+    let render_debug_screen = cfg!(feature = "draw-debugger");
+
+    if render_debug_screen {
         println!("Debugger constructing:");
 
         let debug_window = video_subsys
@@ -86,10 +88,10 @@ fn main() -> Result<(), String> {
                     if keycode == Keycode::Escape {
                         break 'main;
                     } else if keycode == Keycode::W {
-                        scene.camera.position += scene.camera.direction * 0.05;
+                        scene.camera.move_direction(scene.camera.direction * 0.05);
                     //render_scene(&scene, &mut canvas, &scene.camera);
                     } else if keycode == Keycode::S {
-                        scene.camera.position += scene.camera.direction * -0.05;
+                        scene.camera.move_direction(scene.camera.direction * -0.05);
                     //render_scene(&scene, &mut canvas, &scene.camera);
                     // } else if keycode == Keycode::A {
                     // } else if keycode == Keycode::D {
@@ -116,7 +118,10 @@ fn render_scene(scene: &scene::Scene, canvas: &mut Canvas<Window>, cam: &Camera)
         render_canvas_line(&scene, &canvas, &cam, y);
     }
     canvas.present();
-    println!("Finished rendering: {}", now.elapsed().as_millis());
+    println!(
+        "Finished rendering: {} Milliseconds",
+        now.elapsed().as_millis()
+    );
 }
 
 fn render_canvas_line(scene: &scene::Scene, canvas: &Canvas<Window>, cam: &Camera, y: u32) {

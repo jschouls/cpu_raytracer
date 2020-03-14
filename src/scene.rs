@@ -118,12 +118,12 @@ fn draw_camera(_camera: &Camera, _canvas: &mut Canvas<Window>) -> Result<(), Str
         Vec2(_camera.vp.p[1].0, _camera.vp.p[1].2),
     )?;
 
-    let direction = _camera.direction * (_camera.vp.distance * 1.5);
+    let direction_endposition = _camera.position + (_camera.direction * _camera.vp.distance * 1.5);
     _canvas.set_draw_color(Color::RGB(0, 255, 0));
     draw_line(
         _canvas,
         Vec2(_camera.position.0, _camera.position.2),
-        Vec2(direction.0, direction.2),
+        Vec2(direction_endposition.0, direction_endposition.2),
     )?;
 
     Ok(())

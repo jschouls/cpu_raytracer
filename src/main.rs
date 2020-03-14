@@ -31,7 +31,7 @@ pub const MAX_RAY_DEPTH: u16 = 8;
 
 #[allow(dead_code)]
 fn main() -> Result<(), String> {
-    println!("Hello, world!");
+    let mut render_on_change = false;
 
     let sdl_context = sdl2::init()?;
     let video_subsys = sdl_context.video()?;
@@ -96,9 +96,13 @@ fn main() -> Result<(), String> {
                     // } else if keycode == Keycode::A {
                     // } else if keycode == Keycode::D {
                     } else if keycode == Keycode::Space {
+                        // Toggle if you want to render on a change(event) in scene.
+                        render_on_change = !render_on_change;
                     }
 
-                    render_scene(&scene, &mut canvas, &scene.camera);
+                    if render_on_change {
+                        render_scene(&scene, &mut canvas, &scene.camera);
+                    }
                     if render_debug_screen {
                         scene::draw_debug_scene(&scene, _debug_canvas.as_mut().unwrap())?;
                     }

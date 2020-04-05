@@ -39,18 +39,25 @@ pub fn create_scene() -> Scene {
 
     Scene {
         objects: vec![
-            Box::new(Plane::new(Vec3::up(), 2.5, &floor_material)),
+            Box::new(Plane::new(Vec3::up(), 1.0, &floor_material)),
             Box::new(Plane::new(Vec3(0.0, 0.0, 1.0), 5.0, &back_material)),
             Box::new(Plane::new(Vec3(1.0, 0.0, 0.0), 5.0, &back_material)),
             Box::new(Plane::new(Vec3(-1.0, 0.0, 0.0), 5.0, &back_material)),
-            Box::new(Sphere::new(Vec3(2.0, 0.5, -4.0), 1.0, &floor_material)),
+            Box::new(Sphere::new(Vec3(2.0, 0.0, 4.0), 1.0, &floor_material)),
         ],
-        lights: vec![Light {
-            position: Vec3(0.0, 2.5, -2.5),
-            intensity: 5.0,
-            light_type: LightType::Point,
-        }],
-        camera: Camera::set(Vec3::zero(), Vec3(0.0, 0.0, -3.0), 0.5),
+        lights: vec![
+            Light {
+                position: Vec3(2.0, 3.0, 3.0),
+                intensity: 3.0,
+                light_type: LightType::Point,
+            },
+            // Light {
+            //     position: Vec3(0.0, 3.0, 0.0),
+            //     intensity: 2.0,
+            //     light_type: LightType::Point,
+            // },
+        ],
+        camera: Camera::set(Vec3(0.0, 2.0, -5.0), Vec3(0.0, 2.0, 0.0), 0.5),
     }
 }
 
@@ -86,11 +93,16 @@ fn draw_axis(_canvas: &mut Canvas<Window>) -> Result<(), String> {
     Ok(())
 }
 
-pub fn draw_line(_canvas: &mut Canvas<Window>, _start: Vec2, _end: Vec2) -> Result<(), String> {
+pub fn draw_line(
+    _canvas: &mut Canvas<Window>,
+    _start: Vec2,
+    _end: Vec2,
+    _color: Color,
+) -> Result<(), String> {
     let _a = scale_and_to_point(_start);
     let _b = scale_and_to_point(_end);
 
-    _canvas.set_draw_color(Color::RGB(255, 255, 255));
+    _canvas.set_draw_color(_color);
     _canvas.draw_line(_a, _b)?;
 
     Ok(())
@@ -98,10 +110,13 @@ pub fn draw_line(_canvas: &mut Canvas<Window>, _start: Vec2, _end: Vec2) -> Resu
 
 fn draw_camera(_camera: &Camera, _canvas: &mut Canvas<Window>) -> Result<(), String> {
     let dir_p0 = (_camera.vp.p[0] - _camera.position) * 100.0;
+    let white = Color::RGB(255, 255, 255);
+    let red = Color::RGB(255, 0, 0);
     draw_line(
         _canvas,
         Vec2(_camera.position.0, _camera.position.2),
         Vec2(dir_p0.0, dir_p0.2),
+        white,
     )?;
 
     let dir_p1 = (_camera.vp.p[1] - _camera.position) * 100.0;
@@ -110,20 +125,31 @@ fn draw_camera(_camera: &Camera, _canvas: &mut Canvas<Window>) -> Result<(), Str
         _canvas,
         Vec2(_camera.position.0, _camera.position.2),
         Vec2(dir_p1.0, dir_p1.2),
+        white,
     )?;
 
     draw_line(
         _canvas,
         Vec2(_camera.vp.p[0].0, _camera.vp.p[0].2),
         Vec2(_camera.vp.p[1].0, _camera.vp.p[1].2),
+        white,
     )?;
 
-    let direction_endposition = _camera.position + (_camera.direction * _camera.vp.distance * 1.5);
-    _canvas.set_draw_color(Color::RGB(0, 255, 0));
+    let direction_endposition = _camera.position + (_camera.direction * _camera.vp.distance * 1.0);
     draw_line(
         _canvas,
         Vec2(_camera.position.0, _camera.position.2),
         Vec2(direction_endposition.0, direction_endposition.2),
+        Color::RGB(0, 255, 0),
+    )?;
+
+    let r = Vec3::normalize(_camera.right);
+    let right_end = _camera.position + (r * 1.0);
+    draw_line(
+        _canvas,
+        Vec2(_camera.position.0, _camera.position.2),
+        Vec2(right_end.0, right_end.2),
+        Color::RGB(255, 0, 0),
     )?;
 
     Ok(())
@@ -136,7 +162,7 @@ pub fn draw_debug_scene(_scene: &Scene, _canvas: &mut Canvas<Window>) -> Result<
     draw_camera(&_scene.camera, _canvas)?;
 
     for it in _scene.objects.iter() {
-        it.draw2D(_canvas)?;
+        it.draw_debug(_canvas)?;
     }
 
     draw_axis(_canvas)?;

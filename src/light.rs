@@ -1,4 +1,4 @@
-use super::vector::Vec3;
+use super::Vec3;
 
 pub enum LightType {
     Point,

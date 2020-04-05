@@ -7,6 +7,9 @@ pub struct Vec2(pub f32, pub f32);
 #[derive(Debug, PartialEq, Copy, Clone)]
 pub struct Vec3(pub f32, pub f32, pub f32);
 
+#[derive(Debug, PartialEq, Copy, Clone)]
+pub struct Vec4(pub f32, pub f32, pub f32, pub f32);
+
 pub trait Vector {
     fn squared(&self) -> f32;
     fn length(&self) -> f32 {
@@ -153,6 +156,19 @@ impl Vector for Vec3 {
 
     fn dot(&self, other: Self) -> f32 {
         (self.0 * other.0 + self.1 * other.1 + self.2 * other.2)
+    }
+}
+
+// conversions
+impl From<Vec4> for Vec3 {
+    fn from(vec: Vec4) -> Self {
+        Vec3(vec.0, vec.1, vec.2)
+    }
+}
+
+impl From<Vec3> for Vec4 {
+    fn from(vec: Vec3) -> Self {
+        Vec4(vec.0, vec.1, vec.2, 0.0)
     }
 }
 

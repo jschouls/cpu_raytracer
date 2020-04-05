@@ -111,12 +111,5 @@ impl Camera {
             + ((self.vp.p[3] - self.vp.p[0]) * fy);
 
         Ray::new(self.position, Vec3::normalize(vp_point - self.position))
-
-        // Ray {
-        //     is_intersected: super::IntersectData::None,
-        //     origin: self.position,
-        //     direction: Vec3::normalize(vp_point - self.position),
-        //     travel_distance: f32::MAX,
-        // }
     }
 }

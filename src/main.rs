@@ -12,18 +12,17 @@ use std::time::Instant;
 mod camera;
 mod light;
 mod material;
+mod math;
 mod ray;
 mod scene;
 mod shape;
-mod vector;
 
 use camera::Camera;
 use material::Material;
+use math::matrix::Mat4;
+use math::vector::{Vec2, Vec3, Vector};
 use ray::IntersectData;
 use ray::Ray;
-use vector::Vec2;
-use vector::Vec3;
-use vector::Vector;
 
 pub const SCREEN_WIDTH: u32 = 800;
 pub const SCREEN_HEIGHT: u32 = 600;
@@ -89,12 +88,12 @@ fn main() -> Result<(), String> {
                         break 'main;
                     } else if keycode == Keycode::W {
                         scene.camera.move_direction(scene.camera.direction * 0.05);
-                    //render_scene(&scene, &mut canvas, &scene.camera);
                     } else if keycode == Keycode::S {
                         scene.camera.move_direction(scene.camera.direction * -0.05);
-                    //render_scene(&scene, &mut canvas, &scene.camera);
-                    // } else if keycode == Keycode::A {
-                    // } else if keycode == Keycode::D {
+                    } else if keycode == Keycode::A {
+                        scene.camera.move_direction(scene.camera.right * 0.05);
+                    } else if keycode == Keycode::D {
+                        scene.camera.move_direction(scene.camera.right * -0.05);
                     } else if keycode == Keycode::Space {
                         // Toggle if you want to render on a change(event) in scene.
                         render_on_change = !render_on_change;
@@ -137,7 +136,7 @@ fn render_canvas_line(scene: &scene::Scene, canvas: &Canvas<Window>, cam: &Camer
 }
 
 fn raytrace(scene: &scene::Scene, ray: &mut Ray, depth: u16) -> Color {
-    let mut _color = Vec3(0.0, 0.0, 0.0);
+    let mut _color = math::vector::Vec3(0.0, 0.0, 0.0);
 
     // if it above the ray depth
     if depth >= MAX_RAY_DEPTH {
@@ -149,6 +148,8 @@ fn raytrace(scene: &scene::Scene, ray: &mut Ray, depth: u16) -> Color {
         it.intersect(ray);
     }
 
+    let mut shade = 1.0;
+
     if let IntersectData::Found {
         material: in_material,
         normal: in_normal,
@@ -156,16 +157,43 @@ fn raytrace(scene: &scene::Scene, ray: &mut Ray, depth: u16) -> Color {
     {
         let mat_color = Vec3::from_color(in_material.color);
         let _point_intersect: Vec3 = ray.origin + ray.direction * ray.travel_distance;
+        let mut intersected_lightrays = 0u8;
         for _light in scene.lights.iter() {
             // vector to point of intersection to light
             let _to_light = _light.position - _point_intersect;
-            let _n_to_light = Vec3::normalize(_to_light);
+            let to_light_normalized = Vec3::normalize(_to_light);
 
-            let angle = Vec3::dot(*in_normal, _n_to_light);
+            // shoot ray to lights
+
+            let shadow_ray = &mut Ray {
+                origin: _point_intersect + (to_light_normalized * 0.005),
+                direction: to_light_normalized,
+                is_intersected: IntersectData::None,
+                travel_distance: _to_light.length(),
+            };
+
+            for it in scene.objects.iter() {
+                it.intersect(shadow_ray);
+
+                match shadow_ray.is_intersected {
+                    IntersectData::Found { .. } => {
+                        intersected_lightrays += 1;
+                    }
+                    _ => {}
+                }
+
+                // if let IntersectData::Found { .. } = shadow_ray.is_intersected {
+                //     intersected_lightrays += 1;
+                // }
+            }
+
+            shade = 1.0 - (intersected_lightrays as f32 / scene.lights.len() as f32);
+
+            let angle = Vec3::dot(*in_normal, to_light_normalized);
             if angle > 0.0 {
                 let length = _to_light.length();
                 let dist_an = _light.intensity / (length * length);
-                _color += mat_color * dist_an * angle;
+                _color += mat_color * dist_an * angle * shade;
             }
         }
     }

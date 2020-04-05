@@ -2,8 +2,8 @@ use super::material::Material;
 use super::ray::IntersectData;
 use super::ray::Ray;
 use super::scene::draw_line;
-use super::vector::Vec2;
-use super::vector::Vec3;
+use super::Vec2;
+use super::Vec3;
 
 use sdl2::pixels::Color;
 use sdl2::render::Canvas;
@@ -21,7 +21,7 @@ pub trait Shape {
         Color::RGB(0, 0, 0)
     }
 
-    fn draw2D(&self, _canvas: &mut Canvas<Window>) -> Result<(), String> {
+    fn draw_debug(&self, _canvas: &mut Canvas<Window>) -> Result<(), String> {
         Ok(())
     }
 }
@@ -114,7 +114,7 @@ impl Shape for Sphere {
     }
 
     #[cfg(feature = "draw-debugger")]
-    fn draw2D(&self, _canvas: &mut Canvas<Window>) -> Result<(), String> {
+    fn draw_debug(&self, _canvas: &mut Canvas<Window>) -> Result<(), String> {
         let mut p1 = Vec2(
             self.radius * 0.0 + self.position.0,
             self.radius * 1.0 + self.position.2,
@@ -130,7 +130,7 @@ impl Shape for Sphere {
             let rad = (i as f32 * 5.0) * std::f32::consts::PI / 180.0;
             p2.0 = self.radius * rad.sin() + self.position.0; // x
             p2.1 = self.radius * rad.cos() + self.position.2; // z
-            draw_line(_canvas, p1, p2)?;
+            draw_line(_canvas, p1, p2, Color::RGB(255, 255, 255))?;
             p1 = p2;
         }
 

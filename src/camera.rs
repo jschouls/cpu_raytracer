@@ -1,6 +1,6 @@
+use super::ray::Ray;
 use super::Mat4;
 use super::Vec3;
-use crate::Ray;
 use std::f32;
 
 // Ratio needs to change when resolution also change.
@@ -52,23 +52,9 @@ impl Camera {
         // Relative to direction (right hand side)
 
         let lookat_matrix = Mat4::look_at(_pos, _dir, world_up);
-
-        /*let look_direction = Vec3::normalize(_dir - _pos);
-
-        let right = Vec3::cross(look_direction, world_up);
-        // let right = look_direction.cross(world_up);
-        //println!("right: {:?}", right);
-
-        let up = Vec3::cross(right, look_direction);
-        // let up = right.cross(look_direction);
-        //println!("Up: {:?}", up);
-
-        let center: Vec3 = _pos + (look_direction * _plane_distance);*/
-
         // Get vectors from matrix, converted from
         let right = Vec3::from(lookat_matrix.0);
         let up = Vec3::from(lookat_matrix.1);
-        let forward = Vec3::from(lookat_matrix.2);
 
         let direction = Vec3::normalize(_dir - _pos);
 
@@ -76,7 +62,6 @@ impl Camera {
 
         Camera {
             matrix: lookat_matrix,
-
             position: _pos,
             right: right,
             direction: direction,

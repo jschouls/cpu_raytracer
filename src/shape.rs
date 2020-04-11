@@ -1,9 +1,8 @@
 use super::material::Material;
 use super::ray::IntersectData;
 use super::ray::Ray;
-use super::scene::draw_line;
-use super::Vec2;
-use super::Vec3;
+use super::scene;
+use super::{Vec2, Vec3};
 
 use sdl2::pixels::Color;
 use sdl2::render::Canvas;
@@ -130,7 +129,7 @@ impl Shape for Sphere {
             let rad = (i as f32 * 5.0) * std::f32::consts::PI / 180.0;
             p2.0 = self.radius * rad.sin() + self.position.0; // x
             p2.1 = self.radius * rad.cos() + self.position.2; // z
-            draw_line(_canvas, p1, p2, Color::RGB(255, 255, 255))?;
+            scene::draw_line(_canvas, p1, p2, Color::RGB(255, 255, 255))?;
             p1 = p2;
         }
 

@@ -51,11 +51,11 @@ pub fn create_scene() -> Scene {
                 intensity: 3.0,
                 light_type: LightType::Point,
             },
-            // Light {
-            //     position: Vec3(0.0, 3.0, 0.0),
-            //     intensity: 2.0,
-            //     light_type: LightType::Point,
-            // },
+            Light {
+                position: Vec3(2.0, 0.5, 2.0),
+                intensity: 2.0,
+                light_type: LightType::Point,
+            },
         ],
         camera: Camera::set(Vec3(0.0, 2.0, -5.0), Vec3(0.0, 2.0, 0.0), 0.5),
     }

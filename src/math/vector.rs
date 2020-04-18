@@ -96,9 +96,9 @@ impl ops::Mul<f64> for Vec2 {
 
 impl Vec3 {
     pub fn to_color(&self) -> Color {
-        let _r = clamp(self.0, 0.0, 255.0);
-        let _g = clamp(self.1, 0.0, 255.0);
-        let _b = clamp(self.2, 0.0, 255.0);
+        let _r = clamp(self.0 * 225.0, 0.0, 255.0);
+        let _g = clamp(self.1 * 225.0, 0.0, 255.0);
+        let _b = clamp(self.2 * 225.0, 0.0, 255.0);
         Color::RGB(_r as u8, _g as u8, _b as u8)
     }
 
@@ -229,6 +229,18 @@ impl ops::Mul<f64> for Vec3 {
             0: self.0 * _rhs,
             1: self.1 * _rhs,
             2: self.2 * _rhs,
+        }
+    }
+}
+
+impl ops::Div<f64> for Vec3 {
+    type Output = Self;
+
+    fn div(self, _rhs: f64) -> Self::Output {
+        Self {
+            0: self.0 / _rhs,
+            1: self.1 / _rhs,
+            2: self.2 / _rhs,
         }
     }
 }

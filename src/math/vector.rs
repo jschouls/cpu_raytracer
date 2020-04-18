@@ -245,6 +245,18 @@ impl ops::Div<f64> for Vec3 {
     }
 }
 
+impl ops::Neg for Vec3 {
+    type Output = Self;
+
+    fn neg(self) -> Self::Output {
+        Self {
+            0: -self.0,
+            1: -self.1,
+            2: -self.2,
+        }
+    }
+}
+
 // Helper functions
 fn clamp(value: f64, min: f64, max: f64) -> f64 {
     if value > max {

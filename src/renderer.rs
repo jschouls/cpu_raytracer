@@ -12,17 +12,15 @@ use std::time::Instant;
 pub const MAX_RAY_DEPTH: u16 = 8;
 
 pub fn render_scene(scene: &scene::Scene, canvas: &mut Canvas<Window>) -> Result<(), String> {
-    let now = Instant::now();
-
     canvas.clear();
 
+    let now = Instant::now();
     render_to_canvas(&scene, canvas, &scene.camera)?;
-
-    canvas.present();
     println!(
         "Finished rendering: {} Milliseconds",
         now.elapsed().as_millis()
     );
+    canvas.present();
     Ok(())
 }
 
@@ -42,6 +40,19 @@ fn render_to_canvas(
 }
 
 fn raytrace(scene: &scene::Scene, ray: &mut Ray, depth: u16) -> Vec3 {
+    for it in scene.objects.iter() {
+        it.intersect(ray);
+    }
+
+    if let Some(hit) = &ray.is_intersected {
+        return (hit.normal + Vec3(1.0, 1.0, 1.0)) * 0.5;
+    }
+
+    let t = 0.5 * (ray.direction.1 + 1.0);
+    Vec3(1.0, 1.0, 1.0) * (1.0 - t) + (Vec3(0.5, 0.7, 1.0) * t)
+}
+
+/*fn raytrace(scene: &scene::Scene, ray: &mut Ray, depth: u16) -> Vec3 {
     let mut _color = math::vector::Vec3(0.0, 0.0, 0.0);
 
     // if it above the ray depth
@@ -104,4 +115,4 @@ fn raytrace(scene: &scene::Scene, ray: &mut Ray, depth: u16) -> Vec3 {
         }
     }
     _color
-}
+}*/

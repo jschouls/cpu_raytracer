@@ -48,11 +48,7 @@ impl Shape for Plane {
             / Vec3::dot(ray.direction, self.normal);
 
         if t < ray.travel_distance && t >= f64::EPSILON {
-            ray.is_intersected = IntersectData::Found {
-                material: Rc::clone(&self.material),
-                normal: self.normal,
-            };
-            ray.travel_distance = t;
+            ray.set_intersection(t, Rc::clone(&self.material), self.normal);
         }
     }
 
@@ -102,13 +98,9 @@ impl Shape for Sphere {
             _t = _t2;
         }
         if _t < ray.travel_distance {
-            let p_i = ray.origin + ray.direction * _t;
-            let _normal = Vec3::normalize(p_i - self.position);
-            ray.is_intersected = IntersectData::Found {
-                material: Rc::clone(&self.material),
-                normal: _normal,
-            };
-            ray.travel_distance = _t;
+            let point_intersect = ray.at(_t); //ray.origin + ray.direction * _t;
+            let _normal = (point_intersect - self.position) / self.radius;
+            ray.set_intersection(_t, Rc::clone(&self.material), _normal);
         }
     }
 

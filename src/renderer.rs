@@ -5,40 +5,48 @@ use super::scene;
 use super::Camera;
 
 use sdl2::gfx::primitives::DrawRenderer;
-use sdl2::pixels::Color;
 use sdl2::render::Canvas;
 use sdl2::video::Window;
 use std::time::Instant;
 
 pub const MAX_RAY_DEPTH: u16 = 8;
 
-pub fn render_scene(scene: &scene::Scene, canvas: &mut Canvas<Window>, cam: &Camera) {
-    canvas.clear();
+pub fn render_scene(scene: &scene::Scene, canvas: &mut Canvas<Window>) -> Result<(), String> {
     let now = Instant::now();
-    for y in 0..super::SCREEN_HEIGHT {
-        render_canvas_line(&scene, &canvas, &cam, y);
-    }
+
+    canvas.clear();
+
+    render_to_canvas(&scene, canvas, &scene.camera)?;
+
     canvas.present();
     println!(
         "Finished rendering: {} Milliseconds",
         now.elapsed().as_millis()
     );
+    Ok(())
 }
 
-fn render_canvas_line(scene: &scene::Scene, canvas: &Canvas<Window>, cam: &Camera, y: u32) {
-    for x in 0..super::SCREEN_WIDTH {
-        let mut r = cam.generate_ray(x as f32, y as f32);
-        let color = raytrace(&scene, &mut r, 0);
-        canvas.pixel(x as i16, y as i16, color);
+fn render_to_canvas(
+    scene: &scene::Scene,
+    canvas: &Canvas<Window>,
+    cam: &Camera,
+) -> Result<(), String> {
+    for y in 0..super::SCREEN_HEIGHT {
+        for x in 0..super::SCREEN_WIDTH {
+            let mut r = cam.generate_ray(x as f64, y as f64);
+            let color = raytrace(&scene, &mut r, 0);
+            canvas.pixel(x as i16, y as i16, color.to_color())?;
+        }
     }
+    Ok(())
 }
 
-fn raytrace(scene: &scene::Scene, ray: &mut Ray, depth: u16) -> Color {
+fn raytrace(scene: &scene::Scene, ray: &mut Ray, depth: u16) -> Vec3 {
     let mut _color = math::vector::Vec3(0.0, 0.0, 0.0);
 
     // if it above the ray depth
     if depth >= MAX_RAY_DEPTH {
-        return _color.to_color();
+        return _color;
     }
 
     // check for intersection
@@ -85,7 +93,7 @@ fn raytrace(scene: &scene::Scene, ray: &mut Ray, depth: u16) -> Color {
                 // }
             }
 
-            shade = 1.0 - (intersected_lightrays as f32 / scene.lights.len() as f32);
+            shade = 1.0 - (intersected_lightrays as f64 / scene.lights.len() as f64);
 
             let angle = Vec3::dot(*in_normal, to_light_normalized);
             if angle > 0.0 {
@@ -95,5 +103,5 @@ fn raytrace(scene: &scene::Scene, ray: &mut Ray, depth: u16) -> Color {
             }
         }
     }
-    _color.to_color()
+    _color
 }

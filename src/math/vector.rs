@@ -2,22 +2,22 @@ use sdl2::pixels::Color;
 use std::ops;
 
 #[derive(Debug, PartialEq, Copy, Clone)]
-pub struct Vec2(pub f32, pub f32);
+pub struct Vec2(pub f64, pub f64);
 
 #[derive(Debug, PartialEq, Copy, Clone)]
-pub struct Vec3(pub f32, pub f32, pub f32);
+pub struct Vec3(pub f64, pub f64, pub f64);
 
 #[derive(Debug, PartialEq, Copy, Clone)]
-pub struct Vec4(pub f32, pub f32, pub f32, pub f32);
+pub struct Vec4(pub f64, pub f64, pub f64, pub f64);
 
 pub trait Vector {
-    fn squared(&self) -> f32;
-    fn length(&self) -> f32 {
+    fn squared(&self) -> f64;
+    fn length(&self) -> f64 {
         self.squared().sqrt()
     }
 
     fn normalize(&self) -> Self;
-    fn dot(&self, other: Self) -> f32;
+    fn dot(&self, other: Self) -> f64;
 }
 
 /***
@@ -30,7 +30,7 @@ impl Vec2 {
 }
 
 impl Vector for Vec2 {
-    fn squared(&self) -> f32 {
+    fn squared(&self) -> f64 {
         (self.0 * self.0 + self.1 * self.1)
     }
 
@@ -39,7 +39,7 @@ impl Vector for Vec2 {
         Self(self.0 / length, self.1 / length)
     }
 
-    fn dot(&self, other: Self) -> f32 {
+    fn dot(&self, other: Self) -> f64 {
         (self.0 * other.0 + self.1 * other.1)
     }
 }
@@ -79,10 +79,10 @@ impl ops::Mul<Vec2> for Vec2 {
     }
 }
 // scalar mul
-impl ops::Mul<f32> for Vec2 {
+impl ops::Mul<f64> for Vec2 {
     type Output = Self;
 
-    fn mul(self, _rhs: f32) -> Self {
+    fn mul(self, _rhs: f64) -> Self {
         Self {
             0: self.0 * _rhs,
             1: self.1 * _rhs,
@@ -103,7 +103,7 @@ impl Vec3 {
     }
 
     pub fn from_color(color: Color) -> Self {
-        Vec3(color.r as f32, color.g as f32, color.b as f32)
+        Vec3(color.r as f64, color.g as f64, color.b as f64)
     }
 
     // pub fn cross(&self, other: Vec3) -> Self {
@@ -127,7 +127,7 @@ impl Vec3 {
         v.normalize()
     }
 
-    pub fn dot(v1: Self, v2: Self) -> f32 {
+    pub fn dot(v1: Self, v2: Self) -> f64 {
         (v1.0 * v2.0 + v1.1 * v2.1 + v1.2 * v2.2)
     }
 
@@ -141,11 +141,11 @@ impl Vec3 {
 }
 
 impl Vector for Vec3 {
-    fn squared(&self) -> f32 {
+    fn squared(&self) -> f64 {
         (self.0 * self.0 + self.1 * self.1 + self.2 * self.2)
     }
 
-    fn length(&self) -> f32 {
+    fn length(&self) -> f64 {
         self.squared().sqrt()
     }
 
@@ -154,7 +154,7 @@ impl Vector for Vec3 {
         Self(self.0 / length, self.1 / length, self.2 / length)
     }
 
-    fn dot(&self, other: Self) -> f32 {
+    fn dot(&self, other: Self) -> f64 {
         (self.0 * other.0 + self.1 * other.1 + self.2 * other.2)
     }
 }
@@ -221,10 +221,10 @@ impl ops::Mul<Vec3> for Vec3 {
 }
 
 // scalar mul
-impl ops::Mul<f32> for Vec3 {
+impl ops::Mul<f64> for Vec3 {
     type Output = Self;
 
-    fn mul(self, _rhs: f32) -> Self {
+    fn mul(self, _rhs: f64) -> Self {
         Self {
             0: self.0 * _rhs,
             1: self.1 * _rhs,
@@ -234,7 +234,7 @@ impl ops::Mul<f32> for Vec3 {
 }
 
 // Helper functions
-fn clamp(value: f32, min: f32, max: f32) -> f32 {
+fn clamp(value: f64, min: f64, max: f64) -> f64 {
     if value > max {
         max
     } else if value < min {

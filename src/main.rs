@@ -96,7 +96,7 @@ fn main() -> Result<(), String> {
                     }
 
                     if render_on_change {
-                        renderer::render_scene(&scene, &mut canvas, &scene.camera);
+                        renderer::render_scene(&scene, &mut canvas)?;
                     }
                     if render_debug_screen {
                         scene::draw_debug_scene(&scene, _debug_canvas.as_mut().unwrap())?;

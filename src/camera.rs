@@ -1,11 +1,11 @@
 use super::ray::Ray;
 use super::Mat4;
 use super::Vec3;
-use std::f32;
+use std::f64;
 
 // Ratio needs to change when resolution also change.
-const CAMERA_SCREEN_SIZE_HEIGHT: f32 = 0.3;
-const CAMERA_SCREEN_SIZE_WIDTH: f32 = 0.4;
+const CAMERA_SCREEN_SIZE_HEIGHT: f64 = 0.3;
+const CAMERA_SCREEN_SIZE_WIDTH: f64 = 0.4;
 
 /**
  * viewPlane points
@@ -17,12 +17,12 @@ const CAMERA_SCREEN_SIZE_WIDTH: f32 = 0.4;
  */
 #[derive(Debug)]
 pub struct ViewPlane {
-    pub distance: f32,
+    pub distance: f64,
     pub p: [Vec3; 4],
 }
 
 impl ViewPlane {
-    pub fn new(plane_distance: f32, center: Vec3, right: Vec3, up: Vec3) -> Self {
+    pub fn new(plane_distance: f64, center: Vec3, right: Vec3, up: Vec3) -> Self {
         ViewPlane {
             distance: plane_distance,
             p: [
@@ -47,7 +47,7 @@ pub struct Camera {
 }
 
 impl Camera {
-    pub fn set(_pos: Vec3, _dir: Vec3, _plane_distance: f32) -> Self {
+    pub fn set(_pos: Vec3, _dir: Vec3, _plane_distance: f64) -> Self {
         let world_up = Vec3(0.0, 1.0, 0.0);
         // Relative to direction (right hand side)
 
@@ -86,9 +86,9 @@ impl Camera {
         self.vp = ViewPlane::new(self.vp.distance, center, self.right, up)
     }
 
-    pub fn generate_ray(&self, x: f32, y: f32) -> Ray {
-        let fx = x / super::SCREEN_WIDTH as f32;
-        let fy = y / super::SCREEN_HEIGHT as f32;
+    pub fn generate_ray(&self, x: f64, y: f64) -> Ray {
+        let fx = x / super::SCREEN_WIDTH as f64;
+        let fy = y / super::SCREEN_HEIGHT as f64;
 
         // direction to viewplane
         let vp_point = self.vp.p[0]

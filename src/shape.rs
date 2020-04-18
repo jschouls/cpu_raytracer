@@ -8,7 +8,7 @@ use sdl2::pixels::Color;
 use sdl2::render::Canvas;
 use sdl2::video::Window;
 
-use std::f32;
+use std::f64;
 use std::rc::Rc;
 
 pub trait Shape {
@@ -28,12 +28,12 @@ pub trait Shape {
 // Infinite plane
 pub struct Plane {
     normal: Vec3,
-    distance: f32,
+    distance: f64,
     material: Rc<Material>, // Reference count
 }
 
 impl Plane {
-    pub fn new(_normal: Vec3, _distance: f32, _material: &Rc<Material>) -> Self {
+    pub fn new(_normal: Vec3, _distance: f64, _material: &Rc<Material>) -> Self {
         Plane {
             normal: _normal,
             distance: _distance,
@@ -47,7 +47,7 @@ impl Shape for Plane {
         let t = -(Vec3::dot(ray.origin, self.normal) + self.distance)
             / Vec3::dot(ray.direction, self.normal);
 
-        if t < ray.travel_distance && t >= f32::EPSILON {
+        if t < ray.travel_distance && t >= f64::EPSILON {
             ray.is_intersected = IntersectData::Found {
                 material: Rc::clone(&self.material),
                 normal: self.normal,
@@ -65,12 +65,12 @@ impl Shape for Plane {
 
 pub struct Sphere {
     pub position: Vec3,
-    pub radius: f32,
+    pub radius: f64,
     pub material: Rc<Material>,
 }
 
 impl Sphere {
-    pub fn new(_position: Vec3, _radius: f32, _material: &Rc<Material>) -> Self {
+    pub fn new(_position: Vec3, _radius: f64, _material: &Rc<Material>) -> Self {
         Sphere {
             position: _position,
             radius: _radius,
@@ -81,13 +81,13 @@ impl Sphere {
 
 impl Shape for Sphere {
     fn intersect(&self, ray: &mut Ray) {
-        let mut _t: f32 = f32::MAX;
-        let _a: f32 = Vec3::dot(ray.direction, ray.direction);
-        let _b: f32 = 2.0 * Vec3::dot(ray.direction, ray.origin - self.position);
-        let _c: f32 = Vec3::dot(self.position, self.position) + Vec3::dot(ray.origin, ray.origin)
+        let mut _t: f64 = f64::MAX;
+        let _a: f64 = Vec3::dot(ray.direction, ray.direction);
+        let _b: f64 = 2.0 * Vec3::dot(ray.direction, ray.origin - self.position);
+        let _c: f64 = Vec3::dot(self.position, self.position) + Vec3::dot(ray.origin, ray.origin)
             - 2.0 * Vec3::dot(self.position, ray.origin)
             - self.radius * self.radius;
-        let _d: f32 = _b * _b - 4.0 * _a * _c;
+        let _d: f64 = _b * _b - 4.0 * _a * _c;
         if _d < 0.0 {
             return;
         }
@@ -95,10 +95,10 @@ impl Shape for Sphere {
         let _t1 = (-_b - _d.sqrt()) / (2.0 * _a);
         let _t2 = (-_b + _d.sqrt()) / (2.0 * _a);
 
-        if (_t1 < _t) && (_t1 >= f32::EPSILON) {
+        if (_t1 < _t) && (_t1 >= f64::EPSILON) {
             _t = _t1;
         }
-        if (_t2 < _t) && (_t2 >= f32::EPSILON) {
+        if (_t2 < _t) && (_t2 >= f64::EPSILON) {
             _t = _t2;
         }
         if _t < ray.travel_distance {

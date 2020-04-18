@@ -68,8 +68,8 @@ const DRAW_COORDS_MAX_XY: Vec2 = Vec2(5.0, 5.0);
 
 // To 2d scaling
 fn scale_and_to_point(_vec: Vec2) -> Point {
-    let screen_width = super::SCREEN_WIDTH as f32;
-    let screen_height = super::SCREEN_HEIGHT as f32;
+    let screen_width = super::SCREEN_WIDTH as f64;
+    let screen_height = super::SCREEN_HEIGHT as f64;
 
     let totalx = DRAW_COORDS_MAX_XY.0 - DRAW_COORDS_MIN_XY.0;
     let totaly = DRAW_COORDS_MAX_XY.1 - DRAW_COORDS_MIN_XY.1;

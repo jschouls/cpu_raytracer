@@ -9,6 +9,6 @@ pub enum LightType {
 
 pub struct Light {
     pub position: Vec3,
-    pub intensity: f32,
+    pub intensity: f64,
     pub light_type: LightType,
 }

@@ -14,7 +14,7 @@ pub struct Ray {
     pub is_intersected: IntersectData,
     pub direction: Vec3,
     pub origin: Vec3,
-    pub travel_distance: f32,
+    pub travel_distance: f64,
 }
 
 impl Ray {
@@ -23,14 +23,14 @@ impl Ray {
             is_intersected: IntersectData::None,
             direction: direction,
             origin: origin,
-            travel_distance: std::f32::MAX,
+            travel_distance: std::f64::MAX,
         }
     }
 
     //
     pub fn set(&mut self, origin: Vec3, direction: Vec3) {
         self.is_intersected = IntersectData::None;
-        self.travel_distance = std::f32::MAX;
+        self.travel_distance = std::f64::MAX;
         self.direction = direction;
         self.origin = origin;
     }

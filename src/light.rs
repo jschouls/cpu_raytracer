@@ -1,11 +1,10 @@
 use super::Vec3;
 
 pub enum LightType {
-    Point,
-    /*
-    Area {}
-    */
-}
+    /*Point,
+
+Area {}
+*/}
 
 pub struct Light {
     pub position: Vec3,

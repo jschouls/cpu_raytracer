@@ -4,6 +4,7 @@ use std::rc::Rc;
 
 pub struct IntersectData {
     pub material: Rc<Material>,
+    pub position: Vec3,
     pub normal: Vec3,
     pub is_inside: bool,
 }
@@ -16,7 +17,7 @@ pub struct Ray {
 }
 
 impl Ray {
-    pub fn new(origin: Vec3, direction: Vec3) -> Self {
+    pub fn new(origin: Vec3, direction: Vec3) -> Ray {
         Ray {
             is_intersected: None,
             direction: direction,
@@ -29,14 +30,16 @@ impl Ray {
         self.origin + (self.direction * t)
     }
 
+    //pub fn set_intersection(&mut self, ray: &Ray, mat: Rc<Material>, normal: Vec3) {
     pub fn set_intersection(&mut self, t: f64, mat: Rc<Material>, normal: Vec3) {
         let _is_inside = Vec3::dot(self.direction, normal) > 0.0;
+        self.travel_distance = t;
         self.is_intersected = Some(IntersectData {
             material: mat,
+            position: self.at(t),
             is_inside: _is_inside,
             normal: if _is_inside { -normal } else { normal },
         });
-        self.travel_distance = t;
     }
 
     //

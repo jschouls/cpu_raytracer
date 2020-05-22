@@ -39,25 +39,25 @@ pub fn create_scene() -> Scene {
 
     Scene {
         objects: vec![
-            Box::new(Plane::new(Vec3::up(), 1.0, &floor_material)),
-            Box::new(Plane::new(Vec3(0.0, 0.0, 1.0), 5.0, &back_material)),
-            Box::new(Plane::new(Vec3(1.0, 0.0, 0.0), 5.0, &back_material)),
-            Box::new(Plane::new(Vec3(-1.0, 0.0, 0.0), 5.0, &back_material)),
-            Box::new(Sphere::new(Vec3(2.0, 0.0, 4.0), 1.0, &floor_material)),
+            Box::new(Plane::new(Vec3::up(), 0.5, &floor_material)),
+            // Box::new(Plane::new(Vec3(0.0, 0.0, 1.0), 5.0, &back_material)),
+            // Box::new(Plane::new(Vec3(1.0, 0.0, 0.0), 5.0, &back_material)),
+            // Box::new(Plane::new(Vec3(-1.0, 0.0, 0.0), 5.0, &back_material)),
+            Box::new(Sphere::new(Vec3(0.0, 0.0, -1.0), 0.5, &floor_material)),
         ],
         lights: vec![
-            Light {
-                position: Vec3(2.0, 3.0, 3.0),
-                intensity: 3.0,
-                light_type: LightType::Point,
-            },
-            Light {
-                position: Vec3(2.0, 0.5, 2.0),
-                intensity: 2.0,
-                light_type: LightType::Point,
-            },
+            //Light {
+            //    position: Vec3(2.0, 3.0, 3.0),
+            //    intensity: 3.0,
+            //    light_type: LightType::Point,
+            //},
+            //Light {
+            //    position: Vec3(2.0, 0.5, 2.0),
+            //    intensity: 2.0,
+            //    light_type: LightType::Point,
+            //},
         ],
-        camera: Camera::set(Vec3(0.0, 2.0, -5.0), Vec3(0.0, 2.0, 0.0), 0.5),
+        camera: Camera::set(Vec3(0.0, 0.25, 1.0), Vec3(0.0, 0.0, -1.0), 0.5),
     }
 }
 

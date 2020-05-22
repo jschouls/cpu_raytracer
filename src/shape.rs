@@ -2,7 +2,7 @@ use super::material::Material;
 use super::ray::IntersectData;
 use super::ray::Ray;
 use super::scene;
-use super::{Vec2, Vec3};
+use super::Vec3;
 
 use sdl2::pixels::Color;
 use sdl2::render::Canvas;
@@ -12,7 +12,7 @@ use std::f64;
 use std::rc::Rc;
 
 pub trait Shape {
-    fn intersect(&self, ray: &mut Ray);
+    fn intersect(&self, ray: &mut Ray, tolerance: f64);
 
     // Default impl
     fn get_color(&self, _point_intersect: Vec3) -> Color {
@@ -43,11 +43,11 @@ impl Plane {
 }
 
 impl Shape for Plane {
-    fn intersect(&self, ray: &mut Ray) {
+    fn intersect(&self, ray: &mut Ray, tolerance: f64) {
         let t = -(Vec3::dot(ray.origin, self.normal) + self.distance)
             / Vec3::dot(ray.direction, self.normal);
 
-        if t < ray.travel_distance && t >= f64::EPSILON {
+        if t < ray.travel_distance && t >= tolerance {
             ray.set_intersection(t, Rc::clone(&self.material), self.normal);
         }
     }
@@ -76,7 +76,7 @@ impl Sphere {
 }
 
 impl Shape for Sphere {
-    fn intersect(&self, ray: &mut Ray) {
+    fn intersect(&self, ray: &mut Ray, tolerance: f64) {
         let mut _t: f64 = f64::MAX;
         let _a: f64 = Vec3::dot(ray.direction, ray.direction);
         let _b: f64 = 2.0 * Vec3::dot(ray.direction, ray.origin - self.position);
@@ -91,10 +91,10 @@ impl Shape for Sphere {
         let _t1 = (-_b - _d.sqrt()) / (2.0 * _a);
         let _t2 = (-_b + _d.sqrt()) / (2.0 * _a);
 
-        if (_t1 < _t) && (_t1 >= f64::EPSILON) {
+        if (_t1 < _t) && (_t1 >= tolerance) {
             _t = _t1;
         }
-        if (_t2 < _t) && (_t2 >= f64::EPSILON) {
+        if (_t2 < _t) && (_t2 >= tolerance) {
             _t = _t2;
         }
         if _t < ray.travel_distance {

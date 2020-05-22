@@ -10,9 +10,12 @@ edition = "2018"
 
 draw-debugger = []
 
+# For testing
+[dev-dependencies]
+assert_approx_eq = "1.1.0"
 
 [dependencies]
-
+rand = "0.7.3"
 
 [dependencies.sdl2]
     git = "https://github.com/AngryLawyer/rust-sdl2"

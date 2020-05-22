@@ -1,5 +1,10 @@
+use super::clamp;
 use sdl2::pixels::Color;
+use std::f64::consts::PI;
 use std::ops;
+
+extern crate rand;
+use rand::Rng;
 
 #[derive(Debug, PartialEq, Copy, Clone)]
 pub struct Vec2(pub f64, pub f64);
@@ -102,28 +107,101 @@ impl Vec3 {
         Color::RGB(_r as u8, _g as u8, _b as u8)
     }
 
+    #[allow(dead_code)]
     pub fn from_color(color: Color) -> Self {
         Vec3(color.r as f64, color.g as f64, color.b as f64)
     }
 
-    // pub fn cross(&self, other: Vec3) -> Self {
-    //     Self(
-    //         (self.1 * other.2) - (self.2 * other.1),
-    //         (self.2 * other.0) - (self.0 * other.2),
-    //         (self.0 * other.1) - (self.1 * other.0),
-    //     )
-    // }
+    #[allow(dead_code)]
+    pub fn rotate_x(&self, degrees: f64) -> Vec3 {
+        let rad = degrees.to_radians();
+        let rad_cos = rad.cos();
+        let rad_sin = rad.sin();
+        Vec3 {
+            0: self.0,
+            1: self.1 * rad_cos - self.2 * rad_sin,
+            2: self.1 * rad_sin + self.2 * rad_cos,
+        }
+    }
 
-    pub fn zero() -> Self {
+    #[allow(dead_code)]
+    pub fn rotate_y(&self, degrees: f64) -> Vec3 {
+        let rad = degrees.to_radians();
+        let rad_cos = rad.cos();
+        let rad_sin = rad.sin();
+        Vec3 {
+            0: self.0 * rad_cos + self.2 * rad_sin,
+            1: self.1,
+            2: -self.0 * rad_sin + self.2 * rad_cos,
+        }
+    }
+
+    #[allow(dead_code)]
+    pub fn rotate_z(&self, degrees: f64) -> Vec3 {
+        let rad = degrees.to_radians();
+        let rad_cos = rad.cos();
+        let rad_sin = rad.sin();
+        Vec3 {
+            0: self.0 * rad_cos - self.1 * rad_sin,
+            1: self.0 * rad_sin + self.1 * rad_cos,
+            2: self.2,
+        }
+    }
+
+    pub fn zero() -> Vec3 {
         Self(0.0, 0.0, 0.0)
     }
 
-    pub fn up() -> Self {
+    pub fn up() -> Vec3 {
         Self(0.0, 1.0, 0.0)
     }
 
+    pub fn fill(n: f64) -> Vec3 {
+        Self(n, n, n)
+    }
+
+    #[allow(dead_code)]
+    pub fn rand() -> Vec3 {
+        let mut rng = rand::thread_rng();
+        let rng: (f64, f64, f64) = rng.gen();
+        Self(rng.0, rng.1, rng.2)
+    }
+
+    pub fn rand_in_unit_sphere() -> Vec3 {
+        let mut rng = rand::thread_rng();
+        let rngs: (f64, f64, f64, f64) = rng.gen();
+
+        // Start with unit vector, test for gimble lock
+        let unit_vec = Vec3(0.0, 1.0, 0.0);
+        let unit_vec = unit_vec.rotate_x(rngs.0 * 360.0);
+        let unit_vec = unit_vec.rotate_y(rngs.1 * 360.0);
+        let unit_vec = unit_vec.rotate_z(rngs.2 * 360.0);
+        // Change size of vector.
+        let unit_vec = unit_vec * rngs.3;
+
+        unit_vec
+    }
+
+    pub fn rand_in_hemispere(normal: Vec3) -> Vec3 {
+        let in_unit_sphere = Vec3::rand_in_unit_sphere();
+
+        if Vec3::dot(in_unit_sphere, normal) > 0.0 {
+            return in_unit_sphere;
+        }
+
+        return -in_unit_sphere;
+    }
+
+    pub fn rand_unit_vector() -> Vec3 {
+        let mut rng = rand::thread_rng();
+        let a: f64 = rng.gen_range(0.0, 2.0 * PI);
+        let z: f64 = rng.gen_range(-1.0, 1.0);
+        let r = (1.0 - z * z).sqrt();
+        Vec3(r * a.cos(), r * a.sin(), z)
+    }
+
     // could not call from trait?
-    pub fn normalize(v: Self) -> Self {
+    pub fn normalize(v: Self) -> Vec3 {
         v.normalize()
     }
 
@@ -131,7 +209,7 @@ impl Vec3 {
         (v1.0 * v2.0 + v1.1 * v2.1 + v1.2 * v2.2)
     }
 
-    pub fn cross(v1: Self, v2: Self) -> Self {
+    pub fn cross(v1: Self, v2: Self) -> Vec3 {
         Self(
             (v1.1 * v2.2) - (v1.2 * v2.1),
             (v1.2 * v2.0) - (v1.0 * v2.2),
@@ -233,6 +311,19 @@ impl ops::Mul<f64> for Vec3 {
     }
 }
 
+// scalar mul
+impl ops::Mul<u8> for Vec3 {
+    type Output = Self;
+
+    fn mul(self, _rhs: u8) -> Self {
+        Self {
+            0: self.0 * (_rhs as f64),
+            1: self.1 * (_rhs as f64),
+            2: self.2 * (_rhs as f64),
+        }
+    }
+}
+
 impl ops::Div<f64> for Vec3 {
     type Output = Self;
 
@@ -257,25 +348,16 @@ impl ops::Neg for Vec3 {
     }
 }
 
-// Helper functions
-fn clamp(value: f64, min: f64, max: f64) -> f64 {
-    if value > max {
-        max
-    } else if value < min {
-        min
-    } else {
-        value
-    }
-}
-
 /***
  *  Tests
 ***/
 
 #[cfg(test)]
 mod unit_tests {
-
     use super::*;
+
+    extern crate assert_approx_eq;
+    use assert_approx_eq::assert_approx_eq;
 
     // Vec 2
     #[test]
@@ -379,5 +461,60 @@ mod unit_tests {
         let cross = Vec3::cross(a, b);
 
         assert_eq!(cross, Vec3(-3.0, 6.0, -3.0))
+    }
+
+    const ASSERT_MARGIN: f64 = 0.000001f64;
+
+    #[test]
+    fn test_vector3_rotate_y() {
+        let a = Vec3(3.0, 0.5, 0.5);
+
+        let rotated = a.rotate_y(90.0);
+        assert_approx_eq!(rotated.0, 0.5, ASSERT_MARGIN);
+        assert_approx_eq!(rotated.1, 0.5, ASSERT_MARGIN);
+        assert_approx_eq!(rotated.2, -3.0, ASSERT_MARGIN);
+
+        let rotated = a.rotate_y(-90.0);
+        assert_approx_eq!(rotated.0, -0.5, ASSERT_MARGIN);
+        assert_approx_eq!(rotated.1, 0.5, ASSERT_MARGIN);
+        assert_approx_eq!(rotated.2, 3.0, ASSERT_MARGIN);
+    }
+
+    #[test]
+    fn test_vector3_rotate_x() {
+        let a = Vec3(0.0, 0.0, 1.0);
+
+        let rotated = a.rotate_x(90.0);
+        assert_approx_eq!(rotated.0, 0.0, ASSERT_MARGIN);
+        assert_approx_eq!(rotated.1, -1.0, ASSERT_MARGIN);
+        assert_approx_eq!(rotated.2, 0.0, ASSERT_MARGIN);
+
+        let rotated = a.rotate_x(-90.0);
+        assert_approx_eq!(rotated.0, 0.0, ASSERT_MARGIN);
+        assert_approx_eq!(rotated.1, 1.0, ASSERT_MARGIN);
+        assert_approx_eq!(rotated.2, 0.0, ASSERT_MARGIN);
+    }
+
+    #[test]
+    fn test_vector3_rotate_z() {
+        let a = Vec3(0.0, 1.0, 0.0);
+
+        let rotated = a.rotate_z(90.0);
+        assert_approx_eq!(rotated.0, -1.0, ASSERT_MARGIN);
+        assert_approx_eq!(rotated.1, 0.0, ASSERT_MARGIN);
+        assert_approx_eq!(rotated.2, 0.0, ASSERT_MARGIN);
+
+        let rotated = a.rotate_z(-90.0);
+        assert_approx_eq!(rotated.0, 1.0, ASSERT_MARGIN);
+        assert_approx_eq!(rotated.1, 0.0, ASSERT_MARGIN);
+        assert_approx_eq!(rotated.2, 0.0, ASSERT_MARGIN);
+    }
+
+    #[test]
+    fn test_vector3_random_p_inside_unit_shere() {
+        for _i in 0..10 {
+            let rand_p = Vec3::rand_in_unit_sphere();
+            println!("{:?}", rand_p);
+        }
     }
 }

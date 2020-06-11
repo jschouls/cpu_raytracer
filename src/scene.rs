@@ -1,7 +1,7 @@
 use super::light::{Light, LightType};
+use super::material::{Lambertian, Material};
 use super::shape::{Plane, Shape, Sphere};
 use super::Camera;
-use super::Material;
 use super::Vec2;
 use super::Vec3;
 
@@ -25,16 +25,12 @@ pub fn create_scene() -> Scene {
     // Materials
 
     // Reference counter because this can be shared with others and rays.
-    let floor_material = Rc::new(Material {
-        color: Color::RGB(255, 255, 255),
-        reflection: 0.0,
-        refraction: 0.0,
+    let floor_material: Rc<dyn Material> = Rc::new(Lambertian {
+        albedo: Vec3(1.0, 1.0, 1.0),
     });
 
-    let back_material = Rc::new(Material {
-        color: Color::RGB(255, 0, 0),
-        reflection: 0.0,
-        refraction: 0.0,
+    let back_material: Rc<dyn Material> = Rc::new(Lambertian {
+        albedo: Vec3(1.0, 1.0, 1.0),
     });
 
     Scene {

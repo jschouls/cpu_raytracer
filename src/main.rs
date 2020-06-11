@@ -15,7 +15,6 @@ mod scene;
 mod shape;
 
 use camera::Camera;
-use material::Material;
 use math::matrix::Mat4;
 use math::vector::{Vec2, Vec3};
 //use ray::{ IntersectData, ;

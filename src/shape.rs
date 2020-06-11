@@ -29,11 +29,11 @@ pub trait Shape {
 pub struct Plane {
     normal: Vec3,
     distance: f64,
-    material: Rc<Material>, // Reference count
+    material: Rc<dyn Material>, // Reference count
 }
 
 impl Plane {
-    pub fn new(_normal: Vec3, _distance: f64, _material: &Rc<Material>) -> Self {
+    pub fn new(_normal: Vec3, _distance: f64, _material: &Rc<dyn Material>) -> Self {
         Plane {
             normal: _normal,
             distance: _distance,
@@ -62,11 +62,11 @@ impl Shape for Plane {
 pub struct Sphere {
     pub position: Vec3,
     pub radius: f64,
-    pub material: Rc<Material>,
+    pub material: Rc<dyn Material>,
 }
 
 impl Sphere {
-    pub fn new(_position: Vec3, _radius: f64, _material: &Rc<Material>) -> Self {
+    pub fn new(_position: Vec3, _radius: f64, _material: &Rc<dyn Material>) -> Self {
         Sphere {
             position: _position,
             radius: _radius,

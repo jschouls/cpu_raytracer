@@ -3,7 +3,7 @@ use super::Vec3;
 use std::rc::Rc;
 
 pub struct IntersectData {
-    pub material: Rc<Material>,
+    pub material: Rc<dyn Material>,
     pub position: Vec3,
     pub normal: Vec3,
     pub is_inside: bool,
@@ -31,7 +31,7 @@ impl Ray {
     }
 
     //pub fn set_intersection(&mut self, ray: &Ray, mat: Rc<Material>, normal: Vec3) {
-    pub fn set_intersection(&mut self, t: f64, mat: Rc<Material>, normal: Vec3) {
+    pub fn set_intersection(&mut self, t: f64, mat: Rc<dyn Material>, normal: Vec3) {
         let _is_inside = Vec3::dot(self.direction, normal) > 0.0;
         self.travel_distance = t;
         self.is_intersected = Some(IntersectData {

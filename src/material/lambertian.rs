@@ -7,12 +7,12 @@ pub struct Lambertian {
 }
 
 impl Material for Lambertian {
-    fn scatter(&self, ray_in: &Ray, attenuation: Vec3) -> Option<Ray> {
+    fn scatter(&self, ray_in: &Ray) -> Option<(Vec3, Ray)> {
         if let Some(hit) = &ray_in.is_intersected {
             let target = hit.normal + Vec3::rand_unit_vector();
 
             //
-            return Some(Ray::new(hit.position, target));
+            return Some((self.albedo, Ray::new(hit.position, target)));
         }
         None
     }

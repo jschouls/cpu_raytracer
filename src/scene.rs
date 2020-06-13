@@ -29,8 +29,8 @@ pub fn create_scene() -> Scene {
         albedo: Vec3(1.0, 1.0, 1.0),
     });
 
-    let back_material: Rc<dyn Material> = Rc::new(Lambertian {
-        albedo: Vec3(1.0, 1.0, 1.0),
+    let sphere_material: Rc<dyn Material> = Rc::new(Lambertian {
+        albedo: Vec3(1.0, 0.0, 0.0),
     });
 
     Scene {
@@ -39,20 +39,9 @@ pub fn create_scene() -> Scene {
             // Box::new(Plane::new(Vec3(0.0, 0.0, 1.0), 5.0, &back_material)),
             // Box::new(Plane::new(Vec3(1.0, 0.0, 0.0), 5.0, &back_material)),
             // Box::new(Plane::new(Vec3(-1.0, 0.0, 0.0), 5.0, &back_material)),
-            Box::new(Sphere::new(Vec3(0.0, 0.0, -1.0), 0.5, &floor_material)),
+            Box::new(Sphere::new(Vec3(0.0, 0.0, -1.0), 0.5, &sphere_material)),
         ],
-        lights: vec![
-            //Light {
-            //    position: Vec3(2.0, 3.0, 3.0),
-            //    intensity: 3.0,
-            //    light_type: LightType::Point,
-            //},
-            //Light {
-            //    position: Vec3(2.0, 0.5, 2.0),
-            //    intensity: 2.0,
-            //    light_type: LightType::Point,
-            //},
-        ],
+        lights: vec![],
         camera: Camera::set(Vec3(0.0, 0.25, 1.0), Vec3(0.0, 0.0, -1.0), 0.5),
     }
 }

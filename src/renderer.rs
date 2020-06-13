@@ -62,10 +62,15 @@ fn raytrace(scene: &scene::Scene, ray: &mut Ray, depth: u16) -> Vec3 {
 
     if let Some(hit) = &ray.is_intersected {
         //let target = hit.position + hit.normal + Vec3::rand_in_unit_sphere();
-        let target = hit.position + hit.normal + Vec3::rand_unit_vector();
+        //let target = hit.position + hit.normal + Vec3::rand_unit_vector();
+        //let mut ray = Ray::new(hit.position, target - hit.position);
+        //return raytrace(scene, &mut ray, depth + 1) * 0.5;
+        if let Some((attenuation, mut scattered_ray)) = hit.material.scatter(ray) {
+            return attenuation * raytrace(scene, &mut scattered_ray, depth + 1);
+        }
+
         //let target = hit.position + Vec3::rand_in_hemispere(hit.normal);
-        let mut ray = Ray::new(hit.position, target - hit.position);
-        return raytrace(scene, &mut ray, depth + 1) * 0.5;
+        return Vec3(0.0, 0.0, 0.0);
         //return (hit.normal + Vec3(1.0, 1.0, 1.0)) * 0.5;
     }
 
@@ -87,68 +92,3 @@ fn to_color(vec: Vec3, samples: u16) -> Color {
 
     Color::RGB(_r as u8, _g as u8, _b as u8)
 }
-
-/*fn raytrace(scene: &scene::Scene, ray: &mut Ray, depth: u16) -> Vec3 {
-    let mut _color = math::vector::Vec3(0.0, 0.0, 0.0);
-
-    // if it above the ray depth
-    if depth >= MAX_RAY_DEPTH {
-        return _color;
-    }
-
-    // check for intersection
-    for it in scene.objects.iter() {
-        it.intersect(ray);
-    }
-
-    let mut shade = 1.0;
-
-    if let IntersectData::Found {
-        material: in_material,
-        normal: in_normal,
-    } = &ray.is_intersected
-    {
-        let mat_color = Vec3::from_color(in_material.color);
-        let _point_intersect: Vec3 = ray.origin + ray.direction * ray.travel_distance;
-        let mut intersected_lightrays = 0u8;
-        for _light in scene.lights.iter() {
-            // vector to point of intersection to light
-            let _to_light = _light.position - _point_intersect;
-            let to_light_normalized = Vec3::normalize(_to_light);
-
-            // shoot ray to lights
-
-            let shadow_ray = &mut Ray {
-                origin: _point_intersect + (to_light_normalized * 0.005),
-                direction: to_light_normalized,
-                is_intersected: IntersectData::None,
-                travel_distance: _to_light.length(),
-            };
-
-            for it in scene.objects.iter() {
-                it.intersect(shadow_ray);
-
-                match shadow_ray.is_intersected {
-                    IntersectData::Found { .. } => {
-                        intersected_lightrays += 1;
-                    }
-                    _ => {}
-                }
-
-                // if let IntersectData::Found { .. } = shadow_ray.is_intersected {
-                //     intersected_lightrays += 1;
-                // }
-            }
-
-            shade = 1.0 - (intersected_lightrays as f64 / scene.lights.len() as f64);
-
-            let angle = Vec3::dot(*in_normal, to_light_normalized);
-            if angle > 0.0 {
-                let length = _to_light.length();
-                let dist_an = _light.intensity / (length * length);
-                _color += mat_color * dist_an * angle * shade;
-            }
-        }
-    }
-    _color
-}*/

@@ -6,7 +6,7 @@ pub struct IntersectData {
     pub material: Rc<dyn Material>,
     pub position: Vec3,
     pub normal: Vec3,
-    pub is_inside: bool,
+    pub front_face: bool,
 }
 
 pub struct Ray {
@@ -32,13 +32,13 @@ impl Ray {
 
     //pub fn set_intersection(&mut self, ray: &Ray, mat: Rc<Material>, normal: Vec3) {
     pub fn set_intersection(&mut self, t: f64, mat: Rc<dyn Material>, normal: Vec3) {
-        let _is_inside = Vec3::dot(self.direction, normal) > 0.0;
+        let _is_inside = Vec3::dot(self.direction, normal) < 0.0;
         self.travel_distance = t;
         self.is_intersected = Some(IntersectData {
             material: mat,
             position: self.at(t),
-            is_inside: _is_inside,
-            normal: if _is_inside { -normal } else { normal },
+            front_face: _is_inside,
+            normal: if _is_inside { normal } else { -normal },
         });
     }
 

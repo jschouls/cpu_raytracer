@@ -40,7 +40,7 @@ fn render_to_canvas(
     for y in 0..super::SCREEN_HEIGHT {
         for x in 0..super::SCREEN_WIDTH {
             let mut pixel_color = Vec3::zero();
-            for nRP in 0..RAYS_PER_PIXEL {
+            for n_rp in 0..RAYS_PER_PIXEL {
                 let rand_coord: (f64, f64) = rng.gen();
                 let mut r = cam.generate_ray(x as f64 + rand_coord.0, y as f64 + rand_coord.1);
                 pixel_color += raytrace(&scene, &mut r, 0);

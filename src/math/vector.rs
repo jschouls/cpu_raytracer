@@ -216,6 +216,18 @@ impl Vec3 {
             (v1.0 * v2.1) - (v1.1 * v2.0),
         )
     }
+
+    pub fn reflect(vec: Vec3, normal: Vec3) -> Vec3 {
+        (vec - normal * Vec3::dot(vec, normal) * 2.0)
+    }
+
+    pub fn refract(vec: Vec3, normal: Vec3, eta: f64) -> Vec3 {
+        let cos_theta = Vec3::dot(-vec, normal);
+        let out_parallel: Vec3 = (vec + normal * cos_theta) * eta;
+        let out_perp: Vec3 = normal * -(1.0 - out_parallel.squared()).sqrt();
+
+        out_parallel + out_perp
+    }
 }
 
 impl Vector for Vec3 {

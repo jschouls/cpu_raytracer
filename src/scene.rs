@@ -1,5 +1,5 @@
-use super::light::{Light, LightType};
-use super::material::{Lambertian, Material};
+use super::light::Light;
+use super::material::{Dielectric, Lambertian, Material, Metal};
 use super::shape::{Plane, Shape, Sphere};
 use super::Camera;
 use super::Vec2;
@@ -30,8 +30,12 @@ pub fn create_scene() -> Scene {
     });
 
     let sphere_material: Rc<dyn Material> = Rc::new(Lambertian {
-        albedo: Vec3(1.0, 0.0, 0.0),
+        albedo: Vec3(0.1, 0.2, 0.5),
     });
+
+    let metal_material: Rc<dyn Material> = Rc::new(Metal::new(Vec3(0.8, 0.6, 0.2), 0.3));
+
+    let dielectric_mat: Rc<dyn Material> = Rc::new(Dielectric::new(1.5));
 
     Scene {
         objects: vec![
@@ -39,7 +43,10 @@ pub fn create_scene() -> Scene {
             // Box::new(Plane::new(Vec3(0.0, 0.0, 1.0), 5.0, &back_material)),
             // Box::new(Plane::new(Vec3(1.0, 0.0, 0.0), 5.0, &back_material)),
             // Box::new(Plane::new(Vec3(-1.0, 0.0, 0.0), 5.0, &back_material)),
-            Box::new(Sphere::new(Vec3(0.0, 0.0, -1.0), 0.5, &sphere_material)),
+            Box::new(Sphere::new(Vec3(0.0, 0.0, -2.0), 0.5, &sphere_material)),
+            Box::new(Sphere::new(Vec3(1.0, 0.0, -2.0), 0.5, &metal_material)),
+            Box::new(Sphere::new(Vec3(-1.0, 0.0, -2.0), 0.5, &dielectric_mat)),
+            Box::new(Sphere::new(Vec3(-1.0, 0.0, -2.0), -0.45, &dielectric_mat)),
         ],
         lights: vec![],
         camera: Camera::set(Vec3(0.0, 0.25, 1.0), Vec3(0.0, 0.0, -1.0), 0.5),

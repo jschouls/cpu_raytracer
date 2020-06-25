@@ -82,13 +82,13 @@ fn main() -> Result<(), String> {
                     if keycode == Keycode::Escape {
                         break 'main;
                     } else if keycode == Keycode::W {
-                        scene.camera.move_direction(scene.camera.direction * 0.05);
+                        // scene.camera.move_direction(scene.camera.direction * 0.05);
                     } else if keycode == Keycode::S {
-                        scene.camera.move_direction(scene.camera.direction * -0.05);
+                        // scene.camera.move_direction(scene.camera.direction * -0.05);
                     } else if keycode == Keycode::A {
-                        scene.camera.move_direction(scene.camera.right * 0.05);
+                        // scene.camera.move_direction(scene.camera.right * 0.05);
                     } else if keycode == Keycode::D {
-                        scene.camera.move_direction(scene.camera.right * -0.05);
+                        // scene.camera.move_direction(scene.camera.right * -0.05);
                     } else if keycode == Keycode::Space {
                         // Toggle if you want to render on a change(event) in scene.
                         render_on_change = !render_on_change;

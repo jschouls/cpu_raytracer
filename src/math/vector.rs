@@ -1,4 +1,3 @@
-use super::clamp;
 use sdl2::pixels::Color;
 use std::f64::consts::PI;
 use std::ops;
@@ -100,12 +99,12 @@ impl ops::Mul<f64> for Vec2 {
 ***/
 
 impl Vec3 {
-    pub fn to_color(&self) -> Color {
-        let _r = clamp(self.0 * 225.0, 0.0, 255.0);
-        let _g = clamp(self.1 * 225.0, 0.0, 255.0);
-        let _b = clamp(self.2 * 225.0, 0.0, 255.0);
-        Color::RGB(_r as u8, _g as u8, _b as u8)
-    }
+    // pub fn to_color(&self) -> Color {
+    // let _r = clamp(self.0 * 225.0, 0.0, 255.0);
+    // let _g = clamp(self.1 * 225.0, 0.0, 255.0);
+    // let _b = clamp(self.2 * 225.0, 0.0, 255.0);
+    // Color::RGB(_r as u8, _g as u8, _b as u8)
+    // }
 
     #[allow(dead_code)]
     pub fn from_color(color: Color) -> Self {
@@ -113,7 +112,7 @@ impl Vec3 {
     }
 
     #[allow(dead_code)]
-    pub fn rotate_x(&self, degrees: f64) -> Vec3 {
+    pub fn rotate_x(&self, degrees: f64) -> Self {
         let rad = degrees.to_radians();
         let rad_cos = rad.cos();
         let rad_sin = rad.sin();
@@ -125,7 +124,7 @@ impl Vec3 {
     }
 
     #[allow(dead_code)]
-    pub fn rotate_y(&self, degrees: f64) -> Vec3 {
+    pub fn rotate_y(&self, degrees: f64) -> Self {
         let rad = degrees.to_radians();
         let rad_cos = rad.cos();
         let rad_sin = rad.sin();
@@ -137,7 +136,7 @@ impl Vec3 {
     }
 
     #[allow(dead_code)]
-    pub fn rotate_z(&self, degrees: f64) -> Vec3 {
+    pub fn rotate_z(&self, degrees: f64) -> Self {
         let rad = degrees.to_radians();
         let rad_cos = rad.cos();
         let rad_sin = rad.sin();
@@ -148,26 +147,26 @@ impl Vec3 {
         }
     }
 
-    pub fn zero() -> Vec3 {
+    pub fn zero() -> Self {
         Self(0.0, 0.0, 0.0)
     }
 
-    pub fn up() -> Vec3 {
+    pub fn up() -> Self {
         Self(0.0, 1.0, 0.0)
     }
 
-    pub fn fill(n: f64) -> Vec3 {
+    pub fn fill(n: f64) -> Self {
         Self(n, n, n)
     }
 
     #[allow(dead_code)]
-    pub fn rand() -> Vec3 {
+    pub fn rand() -> Self {
         let mut rng = rand::thread_rng();
         let rng: (f64, f64, f64) = rng.gen();
         Self(rng.0, rng.1, rng.2)
     }
 
-    pub fn rand_in_unit_sphere() -> Vec3 {
+    pub fn rand_in_unit_sphere() -> Self {
         let mut rng = rand::thread_rng();
         let rngs: (f64, f64, f64, f64) = rng.gen();
 
@@ -182,7 +181,7 @@ impl Vec3 {
         unit_vec
     }
 
-    pub fn rand_in_hemispere(normal: Vec3) -> Vec3 {
+    pub fn rand_in_hemispere(normal: Vec3) -> Self {
         let in_unit_sphere = Vec3::rand_in_unit_sphere();
 
         if Vec3::dot(in_unit_sphere, normal) > 0.0 {
@@ -192,7 +191,7 @@ impl Vec3 {
         return -in_unit_sphere;
     }
 
-    pub fn rand_unit_vector() -> Vec3 {
+    pub fn rand_unit_vector() -> Self {
         let mut rng = rand::thread_rng();
         let a: f64 = rng.gen_range(0.0, 2.0 * PI);
         let z: f64 = rng.gen_range(-1.0, 1.0);
@@ -201,7 +200,7 @@ impl Vec3 {
     }
 
     // could not call from trait?
-    pub fn normalize(v: Self) -> Vec3 {
+    pub fn normalize(v: Self) -> Self {
         v.normalize()
     }
 
@@ -209,7 +208,7 @@ impl Vec3 {
         (v1.0 * v2.0 + v1.1 * v2.1 + v1.2 * v2.2)
     }
 
-    pub fn cross(v1: Self, v2: Self) -> Vec3 {
+    pub fn cross(v1: Self, v2: Self) -> Self {
         Self(
             (v1.1 * v2.2) - (v1.2 * v2.1),
             (v1.2 * v2.0) - (v1.0 * v2.2),
@@ -217,11 +216,11 @@ impl Vec3 {
         )
     }
 
-    pub fn reflect(vec: Vec3, normal: Vec3) -> Vec3 {
+    pub fn reflect(vec: Vec3, normal: Vec3) -> Self {
         (vec - normal * Vec3::dot(vec, normal) * 2.0)
     }
 
-    pub fn refract(vec: Vec3, normal: Vec3, eta: f64) -> Vec3 {
+    pub fn refract(vec: Vec3, normal: Vec3, eta: f64) -> Self {
         let cos_theta = Vec3::dot(-vec, normal);
         let out_parallel: Vec3 = (vec + normal * cos_theta) * eta;
         let out_perp: Vec3 = normal * -(1.0 - out_parallel.squared()).sqrt();

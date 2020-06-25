@@ -46,10 +46,16 @@ pub fn create_scene() -> Scene {
             Box::new(Sphere::new(Vec3(0.0, 0.0, -2.0), 0.5, &sphere_material)),
             Box::new(Sphere::new(Vec3(1.0, 0.0, -2.0), 0.5, &metal_material)),
             Box::new(Sphere::new(Vec3(-1.0, 0.0, -2.0), 0.5, &dielectric_mat)),
-            Box::new(Sphere::new(Vec3(-1.0, 0.0, -2.0), -0.45, &dielectric_mat)),
+            //Box::new(Sphere::new(Vec3(-1.0, 0.0, -2.0), -0.45, &dielectric_mat)),
         ],
         lights: vec![],
-        camera: Camera::set(Vec3(0.0, 0.25, 1.0), Vec3(0.0, 0.0, -1.0), 0.5),
+        camera: Camera::set(
+            Vec3(-2.0, 2.0, 1.0),
+            Vec3(0.0, 0.0, -2.0),
+            Vec3::up(),
+            20.0,
+            (800.0 / 600.0),
+        ),
     }
 }
 
@@ -100,7 +106,7 @@ pub fn draw_line(
     Ok(())
 }
 
-fn draw_camera(_camera: &Camera, _canvas: &mut Canvas<Window>) -> Result<(), String> {
+/*fn draw_camera(_camera: &Camera, _canvas: &mut Canvas<Window>) -> Result<(), String> {
     let dir_p0 = (_camera.vp.p[0] - _camera.position) * 100.0;
     let white = Color::RGB(255, 255, 255);
     let red = Color::RGB(255, 0, 0);
@@ -145,13 +151,13 @@ fn draw_camera(_camera: &Camera, _canvas: &mut Canvas<Window>) -> Result<(), Str
     )?;
 
     Ok(())
-}
+}*/
 
 pub fn draw_debug_scene(_scene: &Scene, _canvas: &mut Canvas<Window>) -> Result<(), String> {
     _canvas.set_draw_color(Color::RGB(0, 0, 0));
     _canvas.clear();
 
-    draw_camera(&_scene.camera, _canvas)?;
+    //draw_camera(&_scene.camera, _canvas)?;
 
     for it in _scene.objects.iter() {
         it.draw_debug(_canvas)?;

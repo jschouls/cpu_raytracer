@@ -20,8 +20,8 @@ impl Ray {
     pub fn new(origin: Vec3, direction: Vec3) -> Ray {
         Ray {
             is_intersected: None,
-            direction: direction,
-            origin: origin,
+            direction,
+            origin,
             travel_distance: std::f64::MAX,
         }
     }
@@ -31,22 +31,14 @@ impl Ray {
     }
 
     //pub fn set_intersection(&mut self, ray: &Ray, mat: Rc<Material>, normal: Vec3) {
-    pub fn set_intersection(&mut self, t: f64, mat: Rc<dyn Material>, normal: Vec3) {
+    pub fn set_intersection(&mut self, t: f64, material: Rc<dyn Material>, normal: Vec3) {
         let _is_inside = Vec3::dot(self.direction, normal) < 0.0;
         self.travel_distance = t;
         self.is_intersected = Some(IntersectData {
-            material: mat,
+            material,
             position: self.at(t),
             front_face: _is_inside,
             normal: if _is_inside { normal } else { -normal },
         });
     }
-
-    //
-    // pub fn set(&mut self, origin: Vec3, direction: Vec3) {
-    //     self.is_intersected = IntersectData::None;
-    //     self.travel_distance = std::f64::MAX;
-    //     self.direction = direction;
-    //     self.origin = origin;
-    // }
 }

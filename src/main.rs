@@ -15,7 +15,6 @@ mod scene;
 mod shape;
 
 use camera::Camera;
-use math::matrix::Mat4;
 use math::vector::Vec3;
 //use ray::{ IntersectData, ;
 //use ray::Ray;
@@ -43,7 +42,7 @@ fn main() -> Result<(), String> {
 
     let mut events = sdl_context.event_pump()?;
 
-    let mut scene = scene::create_scene();
+    let scene = scene::create_scene();
 
     // if feature debug screen is active
     // Debug windows, feature can be enabled or not. So canvas is an option

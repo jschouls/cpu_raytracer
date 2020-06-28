@@ -165,7 +165,7 @@ impl Vec3 {
 
         unit_vec
     }
-
+    #[allow(dead_code)]
     pub fn rand_in_hemispere(normal: Vec3) -> Self {
         let in_unit_sphere = Vec3::rand_in_unit_sphere();
 

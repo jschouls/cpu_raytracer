@@ -1,7 +1,5 @@
 use super::material::Material;
-use super::ray::IntersectData;
 use super::ray::Ray;
-use super::scene;
 use super::Vec3;
 
 use sdl2::pixels::Color;

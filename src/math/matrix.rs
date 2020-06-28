@@ -4,6 +4,7 @@ use super::Vec4;
 pub struct Mat4(pub Vec4, pub Vec4, pub Vec4, pub Vec4);
 
 impl Mat4 {
+    #[allow(dead_code)]
     pub fn look_at(position: Vec3, to: Vec3, up: Vec3) -> Self {
         let forward = Vec3::normalize(position - to);
         let right = Vec3::cross(up, forward);

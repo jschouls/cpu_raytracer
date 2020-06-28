@@ -16,7 +16,7 @@ mod shape;
 
 use camera::Camera;
 use math::matrix::Mat4;
-use math::vector::{Vec2, Vec3};
+use math::vector::Vec3;
 //use ray::{ IntersectData, ;
 //use ray::Ray;
 
@@ -47,28 +47,28 @@ fn main() -> Result<(), String> {
 
     // if feature debug screen is active
     // Debug windows, feature can be enabled or not. So canvas is an option
-    let mut _debug_canvas = None;
+    //let mut _debug_canvas = None;
     let render_debug_screen = cfg!(feature = "draw-debugger");
 
-    if render_debug_screen {
-        println!("Debugger constructing:");
+    //if render_debug_screen {
+    //    println!("Debugger constructing:");
 
-        let debug_window = video_subsys
-            .window("Debugger", SCREEN_WIDTH, SCREEN_HEIGHT)
-            .position_centered()
-            .opengl()
-            .build()
-            .map_err(|e| e.to_string())?;
+    //    let debug_window = video_subsys
+    //        .window("Debugger", SCREEN_WIDTH, SCREEN_HEIGHT)
+    //        .position_centered()
+    //        .opengl()
+    //        .build()
+    //        .map_err(|e| e.to_string())?;
 
-        _debug_canvas = Some(
-            debug_window
-                .into_canvas()
-                .build()
-                .map_err(|e| e.to_string())?,
-        );
+    //    _debug_canvas = Some(
+    //        debug_window
+    //            .into_canvas()
+    //            .build()
+    //            .map_err(|e| e.to_string())?,
+    //    );
 
-        scene::draw_debug_scene(&scene, _debug_canvas.as_mut().unwrap())?;
-    }
+    //    //scene::draw_debug_scene(&scene, _debug_canvas.as_mut().unwrap())?;
+    //}
 
     'main: loop {
         for event in events.poll_iter() {
@@ -98,7 +98,7 @@ fn main() -> Result<(), String> {
                         renderer::render_scene(&scene, &mut canvas)?;
                     }
                     if render_debug_screen {
-                        scene::draw_debug_scene(&scene, _debug_canvas.as_mut().unwrap())?;
+                        //scene::draw_debug_scene(&scene, _debug_canvas.as_mut().unwrap())?;
                     }
                 }
                 _ => {}

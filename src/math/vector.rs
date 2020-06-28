@@ -24,15 +24,7 @@ pub trait Vector {
     fn dot(&self, other: Self) -> f64;
 }
 
-/***
- *  Vector 2 implementations
-***/
-impl Vec2 {
-    //fn to_vec3(&self) -> Vec3 {
-    //    Vec3(self.0, self.1, 0.0)
-    //}
-}
-
+/*
 impl Vector for Vec2 {
     fn squared(&self) -> f64 {
         (self.0 * self.0 + self.1 * self.1)
@@ -92,20 +84,13 @@ impl ops::Mul<f64> for Vec2 {
             1: self.1 * _rhs,
         }
     }
-}
+}*/
 
 /***
  *  Vector 3 implementations
 ***/
 
 impl Vec3 {
-    // pub fn to_color(&self) -> Color {
-    // let _r = clamp(self.0 * 225.0, 0.0, 255.0);
-    // let _g = clamp(self.1 * 225.0, 0.0, 255.0);
-    // let _b = clamp(self.2 * 225.0, 0.0, 255.0);
-    // Color::RGB(_r as u8, _g as u8, _b as u8)
-    // }
-
     #[allow(dead_code)]
     pub fn from_color(color: Color) -> Self {
         Vec3(color.r as f64, color.g as f64, color.b as f64)
@@ -170,7 +155,7 @@ impl Vec3 {
         let mut rng = rand::thread_rng();
         let rngs: (f64, f64, f64, f64) = rng.gen();
 
-        // Start with unit vector, test for gimble lock
+        // Start with unit vector
         let unit_vec = Vec3(0.0, 1.0, 0.0);
         let unit_vec = unit_vec.rotate_x(rngs.0 * 360.0);
         let unit_vec = unit_vec.rotate_y(rngs.1 * 360.0);
@@ -197,6 +182,22 @@ impl Vec3 {
         let z: f64 = rng.gen_range(-1.0, 1.0);
         let r = (1.0 - z * z).sqrt();
         Vec3(r * a.cos(), r * a.sin(), z)
+    }
+
+    pub fn rand_in_unit_disk() -> Self {
+        let mut rng = rand::thread_rng();
+        let size: f64 = rng.gen();
+        let x: f64 = rng.gen_range(-1.0, 1.0);
+        let y: f64 = rng.gen_range(-1.0, 1.0);
+
+        let unit_vec = Vec3(0.0, 1.0, 0.0);
+        let unit_vec = unit_vec.rotate_x(x * 360.0);
+        let unit_vec = unit_vec.rotate_y(y * 360.0);
+
+        // Change size of vector.
+        let unit_vec = unit_vec * size;
+
+        unit_vec
     }
 
     // could not call from trait?
@@ -371,7 +372,7 @@ mod unit_tests {
     use assert_approx_eq::assert_approx_eq;
 
     // Vec 2
-    #[test]
+    /*#[test]
     fn test_vector2_add() {
         assert_eq!(Vec2(5.0, 5.0) + Vec2(5.0, 5.0), Vec2(10.0, 10.0));
     }
@@ -410,10 +411,8 @@ mod unit_tests {
         assert_eq!(v.length(), 3.6055512);
         let v_normalized = v.normalize();
         assert_eq!(v_normalized.length(), 1.0);
-    }
-
+    }*/
     // Vec 3
-
     #[test]
 
     fn test_vector3_add() {

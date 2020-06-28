@@ -2,17 +2,12 @@ use super::light::Light;
 use super::material::{Dielectric, Lambertian, Material, Metal};
 use super::shape::{Plane, Shape, Sphere};
 use super::Camera;
-use super::Vec2;
 use super::Vec3;
+use crate::math::vector::Vector;
 
 use std::rc::Rc;
 
 extern crate sdl2;
-
-use sdl2::pixels::Color;
-use sdl2::rect::Point;
-use sdl2::render::Canvas;
-use sdl2::video::Window;
 
 pub struct Scene {
     pub objects: Vec<Box<dyn Shape>>,
@@ -20,13 +15,16 @@ pub struct Scene {
     pub camera: Camera,
 }
 
+extern crate rand;
+use rand::Rng;
+
 // Create the scene.
-pub fn create_scene() -> Scene {
+/*pub fn create_scene() -> Scene {
     // Materials
 
     // Reference counter because this can be shared with others and rays.
     let floor_material: Rc<dyn Material> = Rc::new(Lambertian {
-        albedo: Vec3(1.0, 1.0, 1.0),
+        albedo: Vec3(0.5, 0.5, 0.5),
     });
 
     let sphere_material: Rc<dyn Material> = Rc::new(Lambertian {
@@ -37,6 +35,9 @@ pub fn create_scene() -> Scene {
 
     let dielectric_mat: Rc<dyn Material> = Rc::new(Dielectric::new(1.5));
 
+    let from = Vec3(-2.0, 2.0, 1.0);
+    let look_at = Vec3(0.0, 0.0, -2.0);
+    let look_dist = (from - look_at).length();
     Scene {
         objects: vec![
             Box::new(Plane::new(Vec3::up(), 0.5, &floor_material)),
@@ -50,121 +51,89 @@ pub fn create_scene() -> Scene {
         ],
         lights: vec![],
         camera: Camera::set(
-            Vec3(-2.0, 2.0, 1.0),
-            Vec3(0.0, 0.0, -2.0),
+            from,
+            look_at,
             Vec3::up(),
             20.0,
             (800.0 / 600.0),
+            2.0,
+            look_dist,
         ),
     }
-}
-
-/// Debug window
-// Drawing rect
-const DRAW_COORDS_MIN_XY: Vec2 = Vec2(-5.0, -5.0);
-const DRAW_COORDS_MAX_XY: Vec2 = Vec2(5.0, 5.0);
-
-// To 2d scaling
-fn scale_and_to_point(_vec: Vec2) -> Point {
-    let screen_width = super::SCREEN_WIDTH as f64;
-    let screen_height = super::SCREEN_HEIGHT as f64;
-
-    let totalx = DRAW_COORDS_MAX_XY.0 - DRAW_COORDS_MIN_XY.0;
-    let totaly = DRAW_COORDS_MAX_XY.1 - DRAW_COORDS_MIN_XY.1;
-
-    let _x = ((_vec.0 - DRAW_COORDS_MIN_XY.0) / totalx) * screen_width;
-
-    let _y = ((_vec.1 - DRAW_COORDS_MIN_XY.1) / totaly) * screen_height;
-
-    Point::new(_x as i32, _y as i32)
-}
-
-fn draw_axis(_canvas: &mut Canvas<Window>) -> Result<(), String> {
-    // Draw axis
-    let startpoint = Point::new(20, 20);
-    let size = 60;
-    _canvas.set_draw_color(Color::RGB(0, 0, 255));
-    _canvas.draw_line(startpoint, Point::new(startpoint.x(), size))?;
-    _canvas.set_draw_color(Color::RGB(255, 0, 0));
-    _canvas.draw_line(startpoint, Point::new(size, startpoint.y()))?;
-
-    Ok(())
-}
-
-pub fn draw_line(
-    _canvas: &mut Canvas<Window>,
-    _start: Vec2,
-    _end: Vec2,
-    _color: Color,
-) -> Result<(), String> {
-    let _a = scale_and_to_point(_start);
-    let _b = scale_and_to_point(_end);
-
-    _canvas.set_draw_color(_color);
-    _canvas.draw_line(_a, _b)?;
-
-    Ok(())
-}
-
-/*fn draw_camera(_camera: &Camera, _canvas: &mut Canvas<Window>) -> Result<(), String> {
-    let dir_p0 = (_camera.vp.p[0] - _camera.position) * 100.0;
-    let white = Color::RGB(255, 255, 255);
-    let red = Color::RGB(255, 0, 0);
-    draw_line(
-        _canvas,
-        Vec2(_camera.position.0, _camera.position.2),
-        Vec2(dir_p0.0, dir_p0.2),
-        white,
-    )?;
-
-    let dir_p1 = (_camera.vp.p[1] - _camera.position) * 100.0;
-
-    draw_line(
-        _canvas,
-        Vec2(_camera.position.0, _camera.position.2),
-        Vec2(dir_p1.0, dir_p1.2),
-        white,
-    )?;
-
-    draw_line(
-        _canvas,
-        Vec2(_camera.vp.p[0].0, _camera.vp.p[0].2),
-        Vec2(_camera.vp.p[1].0, _camera.vp.p[1].2),
-        white,
-    )?;
-
-    let direction_endposition = _camera.position + (_camera.direction * _camera.vp.distance * 1.0);
-    draw_line(
-        _canvas,
-        Vec2(_camera.position.0, _camera.position.2),
-        Vec2(direction_endposition.0, direction_endposition.2),
-        Color::RGB(0, 255, 0),
-    )?;
-
-    let r = Vec3::normalize(_camera.right);
-    let right_end = _camera.position + (r * 1.0);
-    draw_line(
-        _canvas,
-        Vec2(_camera.position.0, _camera.position.2),
-        Vec2(right_end.0, right_end.2),
-        Color::RGB(255, 0, 0),
-    )?;
-
-    Ok(())
 }*/
 
-pub fn draw_debug_scene(_scene: &Scene, _canvas: &mut Canvas<Window>) -> Result<(), String> {
-    _canvas.set_draw_color(Color::RGB(0, 0, 0));
-    _canvas.clear();
+pub fn create_scene() -> Scene {
+    let from = Vec3(13.0, 2.0, 3.0);
+    let look_at = Vec3(0.0, 0.0, 0.0);
+    let look_dist = (from - look_at).length();
+    let ratio = 800.0 / 600.0;
 
-    //draw_camera(&_scene.camera, _canvas)?;
+    // Materials
+    let ground_material: Rc<dyn Material> = Rc::new(Lambertian {
+        albedo: Vec3(0.5, 0.5, 0.5),
+    });
 
-    for it in _scene.objects.iter() {
-        it.draw_debug(_canvas)?;
+    let material1: Rc<dyn Material> = Rc::new(Dielectric { refract: 1.5 });
+    let material2: Rc<dyn Material> = Rc::new(Lambertian {
+        albedo: Vec3(0.4, 0.2, 0.1),
+    });
+    let material3: Rc<dyn Material> = Rc::new(Metal::new(Vec3(0.7, 0.6, 0.5), 0.0));
+
+    let mut scene = Scene {
+        objects: vec![
+            Box::new(Plane::new(Vec3::up(), 0.0, &ground_material)),
+            Box::new(Sphere::new(Vec3(0.0, 1.0, 0.0), 1.0, &material1)),
+            Box::new(Sphere::new(Vec3(-4.0, 1.0, 0.0), 1.0, &material2)),
+            Box::new(Sphere::new(Vec3(4.0, 1.0, 0.0), 1.0, &material3)),
+        ],
+        lights: vec![],
+        camera: Camera::set(from, look_at, Vec3::up(), 20.0, ratio, 0.1, look_dist),
+    };
+
+    let mut rngs = rand::thread_rng();
+    for a in -11..11 {
+        for b in -11..11 {
+            let rand_mat: f64 = rngs.gen();
+            let rand_center: (f64, f64) = rngs.gen();
+            let center = Vec3(
+                a as f64 + 0.9 * rand_center.0,
+                0.2,
+                b as f64 + 0.9 * rand_center.1,
+            );
+
+            if (center - Vec3(4.0, 0.2, 0.0)).length() > 0.9 {
+                if rand_mat < 0.8 {
+                    // Lambertian
+                    let color1: (f64, f64, f64) = rngs.gen();
+                    let color2: (f64, f64, f64) = rngs.gen();
+                    let albedo = Vec3(
+                        color1.0 * color2.0,
+                        color1.1 * color2.1,
+                        color1.2 * color2.2,
+                    );
+                    let mat: Rc<dyn Material> = Rc::new(Lambertian { albedo });
+                    scene.objects.push(Box::new(Sphere::new(center, 0.2, &mat)));
+                } else if rand_mat < 0.95 {
+                    // metal
+                    let albedo: Vec3 = Vec3(
+                        rngs.gen_range(0.5, 1.0),
+                        rngs.gen_range(0.5, 1.0),
+                        rngs.gen_range(0.5, 1.0),
+                    );
+                    let fuzz = rngs.gen_range(0.0, 0.5);
+                    let mat2: Rc<dyn Material> = Rc::new(Metal::new(albedo, fuzz));
+                    scene
+                        .objects
+                        .push(Box::new(Sphere::new(center, 0.2, &mat2)));
+                } else {
+                    let mat3: Rc<dyn Material> = Rc::new(Dielectric::new(1.5));
+                    scene
+                        .objects
+                        .push(Box::new(Sphere::new(center, 0.2, &mat3)));
+                }
+            }
+        }
     }
 
-    draw_axis(_canvas)?;
-    _canvas.present();
-
-    Ok(())
+    scene
 }

@@ -53,7 +53,7 @@ pub fn create_scene() -> Scene {
             look_at,
             Vec3::up(),
             20.0,
-            (800.0 / 600.0),
+            800.0 / 600.0,
             2.0,
             look_dist,
         ),

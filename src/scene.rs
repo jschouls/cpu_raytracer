@@ -7,8 +7,6 @@ use crate::math::vector::Vector;
 
 use std::rc::Rc;
 
-extern crate sdl2;
-
 pub struct Scene {
     pub objects: Vec<Box<dyn Shape>>,
     pub lights: Vec<Light>,

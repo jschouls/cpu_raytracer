@@ -7,10 +7,6 @@ use super::Camera;
 extern crate rand;
 use rand::prelude::*;
 
-use sdl2::gfx::primitives::DrawRenderer;
-use sdl2::pixels::Color;
-use sdl2::render::Canvas;
-use sdl2::video::Window;
 use std::time::Instant;
 
 pub const MAX_RAY_DEPTH: u16 = 50;

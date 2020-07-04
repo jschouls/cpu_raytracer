@@ -20,8 +20,6 @@ use std::path::Path;
 extern crate libc;
 extern crate png;
 
-use std::alloc::{alloc, Layout};
-
 pub const SCREEN_WIDTH: usize = 800;
 pub const SCREEN_HEIGHT: usize = 600;
 //pub const THREADS: u8 = 4;
@@ -49,13 +47,13 @@ fn main() -> Result<(), std::io::Error> {
             v.set_len(BUFFER_SIZE);
         };
 
-        // We dont going to set to a default value, because we going to overwrite it any way
-
+        // We dont need to set to a default value, because we going to overwrite it any way
         v.into_boxed_slice()
     };
 
     renderer::render_scene(&scene, &mut image).unwrap();
 
     writer.write_image_data(&image).unwrap();
+    println!("New image created: {}", path.display());
     Ok(())
 }

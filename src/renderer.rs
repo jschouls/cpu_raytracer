@@ -7,18 +7,12 @@ use super::Camera;
 extern crate rand;
 use rand::prelude::*;
 
-use sdl2::gfx::primitives::DrawRenderer;
-use sdl2::pixels::Color;
-use sdl2::render::Canvas;
-use sdl2::video::Window;
 use std::time::Instant;
 
 pub const MAX_RAY_DEPTH: u16 = 50;
 pub const RAYS_PER_PIXEL: u16 = 16;
 
-pub fn render_scene(scene: &scene::Scene, canvas: &mut Canvas<Window>) -> Result<(), String> {
-    canvas.clear();
-
+pub fn render_scene(scene: &scene::Scene, canvas: &mut [u8]) -> Result<(), String> {
     println!("Start rendering..");
     let now = Instant::now();
     render_to_canvas(&scene, canvas, &scene.camera)?;
@@ -26,17 +20,13 @@ pub fn render_scene(scene: &scene::Scene, canvas: &mut Canvas<Window>) -> Result
         "Finished rendering: {} Milliseconds",
         now.elapsed().as_millis()
     );
-    canvas.present();
     Ok(())
 }
 
-fn render_to_canvas(
-    scene: &scene::Scene,
-    canvas: &Canvas<Window>,
-    cam: &Camera,
-) -> Result<(), String> {
+fn render_to_canvas(scene: &scene::Scene, canvas: &mut [u8], cam: &Camera) -> Result<(), String> {
     let mut rng = rand::thread_rng();
 
+    let mut index: usize = 0;
     for y in 0..super::SCREEN_HEIGHT {
         for x in 0..super::SCREEN_WIDTH {
             let mut pixel_color = Vec3::zero();
@@ -45,7 +35,11 @@ fn render_to_canvas(
                 let mut r = cam.generate_ray(x as f64 + rand_coord.0, y as f64 + rand_coord.1);
                 pixel_color += raytrace(&scene, &mut r, 0);
             }
-            canvas.pixel(x as i16, y as i16, to_color(pixel_color, RAYS_PER_PIXEL))?;
+            let (r, g, b) = to_color(pixel_color, RAYS_PER_PIXEL);
+            canvas[index] = r;
+            canvas[index + 1] = g;
+            canvas[index + 2] = b;
+            index = index + 3;
         }
     }
     Ok(())
@@ -78,9 +72,9 @@ fn raytrace(scene: &scene::Scene, ray: &mut Ray, depth: u16) -> Vec3 {
     Vec3::fill(1.0) * (1.0 - t) + (Vec3(0.5, 0.7, 1.0) * t)
 }
 
-fn to_color(vec: Vec3, samples: u16) -> Color {
+// Returning rgb u8
+fn to_color(vec: Vec3, samples: u16) -> (u8, u8, u8) {
     let scale = 1.0 / samples as f64;
-    //let c = vec * scale;
 
     let _r = (scale * vec.0).sqrt();
     let _g = (scale * vec.1).sqrt();
@@ -90,5 +84,5 @@ fn to_color(vec: Vec3, samples: u16) -> Color {
     let _g = math::clamp(_g, 0.0, 0.9999) * 256.0;
     let _b = math::clamp(_b, 0.0, 0.9999) * 256.0;
 
-    Color::RGB(_r as u8, _g as u8, _b as u8)
+    (_r as u8, _g as u8, _b as u8)
 }

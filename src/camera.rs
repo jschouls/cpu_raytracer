@@ -31,30 +31,6 @@ pub struct Camera {
 }
 
 impl Camera {
-    // pub fn set(position: Vec3, look_at: Vec3, up: Vec3, fov: f64, ratio: f64) -> Camera {
-    //     let theta = fov.to_radians();
-    //     let h = (theta / 2.0).tan();
-    //     let view_height = 2.0 * h;
-    //     let view_width = ratio * view_height;
-
-    //     let to = Vec3::normalize(position - look_at);
-    //     let u = Vec3::normalize(Vec3::cross(up, to));
-    //     let v = Vec3::cross(to, u);
-
-    //     let horizonal = u * view_width;
-    //     let vertical = v * view_height;
-    //     // + vertical because I draw from top left
-    //     let lt_corner = position - (horizonal / 2.0) + (vertical / 2.0) - to;
-
-    //     Camera {
-    //         position,
-    //         direction: to,
-    //         horizonal,
-    //         vertical,
-    //         lower_top_corner: lt_corner,
-    //     }
-    // }
-
     pub fn set(
         position: Vec3,
         look_at: Vec3,

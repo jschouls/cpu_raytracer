@@ -12,7 +12,6 @@ use std::time::Instant;
 pub const MAX_RAY_DEPTH: u16 = 50;
 pub const RAYS_PER_PIXEL: u16 = 16;
 
-//pub fn render_scene(scene: &scene::Scene, canvas: &mut Vec<u8>) -> Result<(), String> {
 pub fn render_scene(scene: &scene::Scene, canvas: &mut [u8]) -> Result<(), String> {
     println!("Start rendering..");
     let now = Instant::now();

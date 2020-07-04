@@ -17,7 +17,7 @@ extern crate rand;
 use rand::Rng;
 
 // Create the scene.
-/*pub fn create_scene() -> Scene {
+pub fn create_scene() -> Scene {
     // Materials
 
     // Reference counter because this can be shared with others and rays.
@@ -58,9 +58,9 @@ use rand::Rng;
             look_dist,
         ),
     }
-}*/
+}
 
-pub fn create_scene() -> Scene {
+/*pub fn create_scene() -> Scene {
     let from = Vec3(13.0, 2.0, 3.0);
     let look_at = Vec3(0.0, 0.0, 0.0);
     let look_dist = (from - look_at).length();
@@ -134,4 +134,4 @@ pub fn create_scene() -> Scene {
     }
 
     scene
-}
+}*/

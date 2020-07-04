@@ -2,10 +2,6 @@ use super::material::Material;
 use super::ray::Ray;
 use super::Vec3;
 
-use sdl2::pixels::Color;
-use sdl2::render::Canvas;
-use sdl2::video::Window;
-
 use std::f64;
 use std::rc::Rc;
 
@@ -13,14 +9,14 @@ pub trait Shape {
     fn intersect(&self, ray: &mut Ray, tolerance: f64);
 
     // Default impl
-    fn get_color(&self, _point_intersect: Vec3) -> Color {
+    fn get_color(&self, _point_intersect: Vec3) -> Vec3 {
         // Default black color
-        Color::RGB(0, 0, 0)
+        Vec3(0.0, 0.0, 0.0)
     }
 
-    fn draw_debug(&self, _canvas: &mut Canvas<Window>) -> Result<(), String> {
-        Ok(())
-    }
+    // fn draw_debug(&self, _canvas: &mut Canvas<Window>) -> Result<(), String> {
+    //     Ok(())
+    // }
 }
 
 // Infinite plane
@@ -50,8 +46,8 @@ impl Shape for Plane {
         }
     }
 
-    fn get_color(&self, _point_intersect: Vec3) -> Color {
-        Color::RGB(0, 0, 0)
+    fn get_color(&self, _point_intersect: Vec3) -> Vec3 {
+        Vec3(0.0, 0.0, 0.0)
     }
 }
 

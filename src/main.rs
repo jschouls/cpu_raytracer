@@ -22,7 +22,6 @@ extern crate png;
 
 pub const SCREEN_WIDTH: usize = 800;
 pub const SCREEN_HEIGHT: usize = 600;
-//pub const THREADS: u8 = 4;
 
 #[allow(dead_code)]
 fn main() -> Result<(), std::io::Error> {

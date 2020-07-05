@@ -5,7 +5,7 @@ use super::Camera;
 use super::Vec3;
 use crate::math::vector::Vector;
 
-use std::rc::Rc;
+use std::sync::Arc;
 
 pub struct Scene {
     pub objects: Vec<Box<dyn Shape>>,
@@ -21,17 +21,17 @@ pub fn create_scene() -> Scene {
     // Materials
 
     // Reference counter because this can be shared with others and rays.
-    let floor_material: Rc<dyn Material> = Rc::new(Lambertian {
+    let floor_material: Arc<dyn Material> = Arc::new(Lambertian {
         albedo: Vec3(0.5, 0.5, 0.5),
     });
 
-    let sphere_material: Rc<dyn Material> = Rc::new(Lambertian {
+    let sphere_material: Arc<dyn Material> = Arc::new(Lambertian {
         albedo: Vec3(0.1, 0.2, 0.5),
     });
 
-    let metal_material: Rc<dyn Material> = Rc::new(Metal::new(Vec3(0.8, 0.6, 0.2), 0.3));
+    let metal_material: Arc<dyn Material> = Arc::new(Metal::new(Vec3(0.8, 0.6, 0.2), 0.3));
 
-    let dielectric_mat: Rc<dyn Material> = Rc::new(Dielectric::new(1.5));
+    let dielectric_mat: Arc<dyn Material> = Arc::new(Dielectric::new(1.5));
 
     let from = Vec3(-2.0, 2.0, 1.0);
     let look_at = Vec3(0.0, 0.0, -2.0);
@@ -67,15 +67,15 @@ pub fn create_scene() -> Scene {
     let ratio = 800.0 / 600.0;
 
     // Materials
-    let ground_material: Rc<dyn Material> = Rc::new(Lambertian {
+    let ground_material: Arc<dyn Material> = Arc::new(Lambertian {
         albedo: Vec3(0.5, 0.5, 0.5),
     });
 
-    let material1: Rc<dyn Material> = Rc::new(Dielectric { refract: 1.5 });
-    let material2: Rc<dyn Material> = Rc::new(Lambertian {
+    let material1: Arc<dyn Material> = Arc::new(Dielectric { refract: 1.5 });
+    let material2: Arc<dyn Material> = Arc::new(Lambertian {
         albedo: Vec3(0.4, 0.2, 0.1),
     });
-    let material3: Rc<dyn Material> = Rc::new(Metal::new(Vec3(0.7, 0.6, 0.5), 0.0));
+    let material3: Arc<dyn Material> = Arc::new(Metal::new(Vec3(0.7, 0.6, 0.5), 0.0));
 
     let mut scene = Scene {
         objects: vec![
@@ -109,7 +109,7 @@ pub fn create_scene() -> Scene {
                         color1.1 * color2.1,
                         color1.2 * color2.2,
                     );
-                    let mat: Rc<dyn Material> = Rc::new(Lambertian { albedo });
+                    let mat: Arc<dyn Material> = Arc::new(Lambertian { albedo });
                     scene.objects.push(Box::new(Sphere::new(center, 0.2, &mat)));
                 } else if rand_mat < 0.95 {
                     // metal
@@ -119,12 +119,12 @@ pub fn create_scene() -> Scene {
                         rngs.gen_range(0.5, 1.0),
                     );
                     let fuzz = rngs.gen_range(0.0, 0.5);
-                    let mat2: Rc<dyn Material> = Rc::new(Metal::new(albedo, fuzz));
+                    let mat2: Arc<dyn Material> = Arc::new(Metal::new(albedo, fuzz));
                     scene
                         .objects
                         .push(Box::new(Sphere::new(center, 0.2, &mat2)));
                 } else {
-                    let mat3: Rc<dyn Material> = Rc::new(Dielectric::new(1.5));
+                    let mat3: Arc<dyn Material> = Arc::new(Dielectric::new(1.5));
                     scene
                         .objects
                         .push(Box::new(Sphere::new(center, 0.2, &mat3)));

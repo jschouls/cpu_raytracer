@@ -142,7 +142,7 @@ impl Vec3 {
     }
 
     pub fn dot(v1: Self, v2: Self) -> f64 {
-        (v1.0 * v2.0 + v1.1 * v2.1 + v1.2 * v2.2)
+        v1.0 * v2.0 + v1.1 * v2.1 + v1.2 * v2.2
     }
 
     pub fn cross(v1: Self, v2: Self) -> Self {
@@ -154,7 +154,7 @@ impl Vec3 {
     }
 
     pub fn reflect(vec: Vec3, normal: Vec3) -> Self {
-        (vec - normal * Vec3::dot(vec, normal) * 2.0)
+        vec - normal * Vec3::dot(vec, normal) * 2.0
     }
 
     pub fn refract(vec: Vec3, normal: Vec3, eta: f64) -> Self {
@@ -168,7 +168,7 @@ impl Vec3 {
 
 impl Vector for Vec3 {
     fn squared(&self) -> f64 {
-        (self.0 * self.0 + self.1 * self.1 + self.2 * self.2)
+        self.0 * self.0 + self.1 * self.1 + self.2 * self.2
     }
 
     fn length(&self) -> f64 {
@@ -181,7 +181,7 @@ impl Vector for Vec3 {
     }
 
     fn dot(&self, other: Self) -> f64 {
-        (self.0 * other.0 + self.1 * other.1 + self.2 * other.2)
+        self.0 * other.0 + self.1 * other.1 + self.2 * other.2
     }
 }
 

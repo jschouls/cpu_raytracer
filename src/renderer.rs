@@ -1,4 +1,3 @@
-use super::math;
 use super::math::vector::Vec3;
 use super::ray::Ray;
 use super::scene;
@@ -80,9 +79,9 @@ fn to_color(vec: Vec3, samples: u16) -> (u8, u8, u8) {
     let _g = (scale * vec.1).sqrt();
     let _b = (scale * vec.2).sqrt();
 
-    let _r = math::clamp(_r, 0.0, 0.9999) * 256.0;
-    let _g = math::clamp(_g, 0.0, 0.9999) * 256.0;
-    let _b = math::clamp(_b, 0.0, 0.9999) * 256.0;
+    let _r = f64::clamp(_r, 0.0, 0.9999) * 256.0;
+    let _g = f64::clamp(_g, 0.0, 0.9999) * 256.0;
+    let _b = f64::clamp(_b, 0.0, 0.9999) * 256.0;
 
     (_r as u8, _g as u8, _b as u8)
 }

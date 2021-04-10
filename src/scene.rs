@@ -14,7 +14,6 @@ pub struct Scene {
 }
 
 extern crate rand;
-use rand::Rng;
 
 // Create the scene.
 pub fn create_scene() -> Scene {

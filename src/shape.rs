@@ -5,7 +5,7 @@ use super::Vec3;
 use std::f64;
 use std::sync::Arc;
 
-pub trait Shape {
+pub trait Shape: Sync + Send {
     fn intersect(&self, ray: &mut Ray, tolerance: f64);
 
     // Default impl

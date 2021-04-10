@@ -13,8 +13,8 @@ pub struct Scene {
     pub camera: Camera,
 }
 
-extern crate rand;
-use rand::Rng;
+//extern crate rand;
+//use rand::Rng;
 
 // Create the scene.
 pub fn create_scene() -> Scene {

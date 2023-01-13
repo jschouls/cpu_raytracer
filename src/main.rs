@@ -8,6 +8,7 @@ mod ray;
 mod renderer;
 mod scene;
 mod shape;
+mod threadpool;
 
 use camera::Camera;
 use math::vector::Vec3;
@@ -18,6 +19,8 @@ use std::io::BufWriter;
 use std::path::Path;
 use std::sync::{Arc, RwLock};
 
+use renderer::RenderSettings;
+
 extern crate libc;
 extern crate png;
 
@@ -26,7 +29,11 @@ pub const SCREEN_HEIGHT: usize = 600;
 
 #[allow(dead_code)]
 fn main() -> Result<(), std::io::Error> {
-    //let scene = scene::create_scene();
+    let render_setting: RenderSettings = RenderSettings {
+        screen_width: SCREEN_WIDTH,
+        screen_height: SCREEN_HEIGHT,
+    };
+
     // Scene is just a read only data object.
     let scene = Arc::new(RwLock::new(scene::create_scene()));
 
@@ -41,21 +48,11 @@ fn main() -> Result<(), std::io::Error> {
 
     let mut writer = encoder.write_header().unwrap();
 
-    // Create buffer on heap.
-    const BUFFER_SIZE: usize = SCREEN_WIDTH * SCREEN_HEIGHT * 3;
-    let mut image = {
-        let mut v = Vec::with_capacity(BUFFER_SIZE);
-        unsafe {
-            v.set_len(BUFFER_SIZE);
-        };
+    let image_data = renderer::render_scene(scene, &render_setting).unwrap();
 
-        // We dont need to set to a default value, because we going to overwrite it any way
-        v.into_boxed_slice()
-    };
+    writer.write_image_data(&image_data).unwrap();
 
-    renderer::render_scene(scene, &mut image).unwrap();
-
-    writer.write_image_data(&image).unwrap();
     println!("New image created: {}", path.display());
+
     Ok(())
 }

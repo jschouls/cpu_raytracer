@@ -1,129 +1,112 @@
-use super::math;
 use super::math::vector::Vec3;
 use super::ray::Ray;
 use super::scene::Scene;
+use super::threadpool::ThreadPool;
 
 extern crate rand;
 use rand::prelude::*;
 
 use std::sync::Arc;
+use std::sync::Mutex;
 use std::sync::RwLock;
-use std::thread;
 use std::time::Instant;
 
 pub const MAX_RAY_DEPTH: u16 = 50;
 pub const RAYS_PER_PIXEL: u16 = 16;
-pub const NUM_THREADS: u8 = 4;
+pub const NUM_THREADS: usize = 4;
 const BYTES_PIXEL: usize = 3;
 
-// struct render_job<'a> {
+// struct RenderJob {
+//     index: u32,
 //     screen_position: (u32, u32),
-//     chunk: &'a mut [u8],
+//     color: u32,
 // }
 
-pub fn render_scene<'a>(
+pub struct RenderSettings {
+    pub screen_width: usize,
+    pub screen_height: usize,
+}
+
+pub fn render_scene(
     scene: Arc<RwLock<Scene>>,
-    canvas: &'static mut [u8],
-) -> Result<(), String> {
-    println!("Start rendering..");
+    render_setting: &RenderSettings,
+) -> Result<Vec<u8>, String> {
+    // Create jobs
+    println!("Preparing..");
+
     let now = Instant::now();
 
-    let mut threads = vec![];
+    let pool = ThreadPool::new(NUM_THREADS);
 
-    // threads.push(thread::spawn(render_to_canvas
-    //
-    // ));
+    // Create buffer on heap.
+    let buffer_size: usize =
+        render_setting.screen_width * render_setting.screen_height * BYTES_PIXEL;
 
-    const TOTAL_PIXELS: usize = super::SCREEN_WIDTH * super::SCREEN_HEIGHT;
+    let image = {
+        let mut v: Vec<u8> = Vec::with_capacity(buffer_size);
+        unsafe {
+            v.set_len(buffer_size);
+        };
 
-    const NUM_CHUNKS: usize = 4;
-    const CHUNK_SIZE_BYTES: usize = (TOTAL_PIXELS / NUM_CHUNKS) * BYTES_PIXEL;
-    // Create list of chunks
-    let chunks = canvas.chunks_mut(CHUNK_SIZE_BYTES);
+        Arc::new(Mutex::new(v))
+    };
 
-    // Need to know the xy position in order to draw it
-    for (i, chunk) in chunks.enumerate() {
-        let arc_scene = scene.clone();
-        let bytes_chunk = i * CHUNK_SIZE_BYTES;
-        let x = bytes_chunk % (super::SCREEN_WIDTH * BYTES_PIXEL); // remainder
-        let y = bytes_chunk / (super::SCREEN_WIDTH * BYTES_PIXEL);
-        println!("Chunk[{}]: x:{}, y:{}", i, x, y);
-        threads.push(thread::spawn(move || {
-            render_to_canvas(&arc_scene, chunk, (x, y))
-        }));
+    println!("Start rendering..");
+
+    // for index in 0..(render_setting.screen_width * render_setting.screen_height) {
+    let mut index = 0;
+    for y in 0..super::SCREEN_HEIGHT {
+        for x in 0..super::SCREEN_WIDTH {
+            let arc_scene = scene.clone();
+            let arc_image = image.clone();
+
+            pool.schedule(move || render_pixel(&arc_scene, &arc_image, (x, y, index)));
+            index = index + BYTES_PIXEL;
+        }
     }
 
-    // wait for childeren to finish
-    for thread in threads {
-        let _ = thread.join().unwrap();
-    }
+    // Stop workers and wait.
+    drop(pool);
+
     println!(
         "Finished rendering: {} Milliseconds",
         now.elapsed().as_millis()
     );
-    Ok(())
+
+    if let Ok(result) = Arc::try_unwrap(image) {
+        Ok(result.into_inner().unwrap())
+    } else {
+        Err(String::from("Not able to get result."))
+    }
 }
 
-fn render_to_canvas<'a>(
+fn render_pixel(
     scene: &Arc<RwLock<Scene>>,
-    canvas: &'a mut [u8],
-    screen_coords: (usize, usize),
-) -> Result<(), String> {
+    pixel_data: &Arc<Mutex<Vec<u8>>>,
+    coordinate: (usize, usize, usize),
+) {
     let mut rng = rand::thread_rng();
 
-    //let mut index: usize = 0;
-    let (mut x, mut y) = screen_coords;
-
-    for pixel in (0..canvas.len()).step_by(BYTES_PIXEL) {
-        let mut pixel_color = Vec3::zero();
-        for n_rp in 0..RAYS_PER_PIXEL {
-            let rand_coord: (f64, f64) = rng.gen();
-            let mut r = scene
-                .read()
-                .unwrap()
-                .camera
-                .generate_ray(x as f64 + rand_coord.0, y as f64 + rand_coord.1);
-            pixel_color += raytrace(scene, &mut r, 0);
-        }
-        let (r, g, b) = to_color(pixel_color, RAYS_PER_PIXEL);
-
-        canvas[pixel] = r;
-        canvas[pixel + 1] = g;
-        canvas[pixel + 2] = b;
-
-        x = x + 1;
-        if x >= super::SCREEN_WIDTH {
-            x = 0;
-            y = y + 1;
-        }
+    let mut pixel_color = Vec3::zero();
+    for _n_rp in 0..RAYS_PER_PIXEL {
+        let rand_coord: (f64, f64) = rng.gen();
+        let mut r = scene.read().unwrap().camera.generate_ray(
+            coordinate.0 as f64 + rand_coord.0,
+            coordinate.1 as f64 + rand_coord.1,
+        );
+        pixel_color += raytrace(&scene, &mut r, 0);
     }
+    let (r, g, b) = to_color(pixel_color, RAYS_PER_PIXEL);
 
-    Ok(())
+    let pixel_index: usize = coordinate.2;
+    // We have the result, lock datalist
+    let mut pixel = pixel_data.lock().unwrap();
+    pixel[pixel_index] = r;
+    pixel[pixel_index + 1] = g;
+    pixel[pixel_index + 2] = b;
+
+    println!("Pixel {pixel_index} done calculating");
 }
-
-/*fn render_to_canvas(scene: &Scene, canvas: &mut [u8]) -> Result<(), String> {
-    let mut rng = rand::thread_rng();
-
-    let mut index: usize = 0;
-    for y in 0..super::SCREEN_HEIGHT {
-        for x in 0..super::SCREEN_WIDTH {
-            let mut pixel_color = Vec3::zero();
-            for n_rp in 0..RAYS_PER_PIXEL {
-                let rand_coord: (f64, f64) = rng.gen();
-                let mut r = scene
-                    .camera
-                    .generate_ray(x as f64 + rand_coord.0, y as f64 + rand_coord.1);
-                pixel_color += raytrace(&scene, &mut r, 0);
-            }
-            let (r, g, b) = to_color(pixel_color, RAYS_PER_PIXEL);
-            canvas[index] = r;
-            canvas[index + 1] = g;
-            canvas[index + 2] = b;
-            index = index + 3;
-        }
-    }
-    Ok(())
-}*/
 
 fn raytrace(scene: &Arc<RwLock<Scene>>, ray: &mut Ray, depth: u16) -> Vec3 {
     if depth >= MAX_RAY_DEPTH {
@@ -158,9 +141,9 @@ fn to_color(vec: Vec3, samples: u16) -> (u8, u8, u8) {
     let _b = (scale * vec.2).sqrt();
 
     let _r = f64::clamp(_r, 0.0, 0.9999) * 256.0;
-    let _r = math::clamp(_r, 0.0, 0.9999) * 256.0;
-    let _g = math::clamp(_g, 0.0, 0.9999) * 256.0;
-    let _b = math::clamp(_b, 0.0, 0.9999) * 256.0;
+    let _r = f64::clamp(_r, 0.0, 0.9999) * 256.0;
+    let _g = f64::clamp(_g, 0.0, 0.9999) * 256.0;
+    let _b = f64::clamp(_b, 0.0, 0.9999) * 256.0;
 
     (_r as u8, _g as u8, _b as u8)
 }

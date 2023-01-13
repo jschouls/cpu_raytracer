@@ -96,6 +96,7 @@ fn render_pixel(
         );
         pixel_color += raytrace(&scene, &mut r, 0);
     }
+
     let (r, g, b) = to_color(pixel_color, RAYS_PER_PIXEL);
 
     let pixel_index: usize = coordinate.2;
@@ -105,7 +106,7 @@ fn render_pixel(
     pixel[pixel_index + 1] = g;
     pixel[pixel_index + 2] = b;
 
-    println!("Pixel {pixel_index} done calculating");
+    //println!("Pixel {pixel_index} ({r},{g},{b}) done calculating");
 }
 
 fn raytrace(scene: &Arc<RwLock<Scene>>, ray: &mut Ray, depth: u16) -> Vec3 {
@@ -128,6 +129,7 @@ fn raytrace(scene: &Arc<RwLock<Scene>>, ray: &mut Ray, depth: u16) -> Vec3 {
         //return (hit.normal + Vec3(1.0, 1.0, 1.0)) * 0.5;
     }
 
+    //sky
     let t = 0.5 * (ray.direction.1 + 1.0);
     Vec3::fill(1.0) * (1.0 - t) + (Vec3(0.5, 0.7, 1.0) * t)
 }
@@ -140,7 +142,6 @@ fn to_color(vec: Vec3, samples: u16) -> (u8, u8, u8) {
     let _g = (scale * vec.1).sqrt();
     let _b = (scale * vec.2).sqrt();
 
-    let _r = f64::clamp(_r, 0.0, 0.9999) * 256.0;
     let _r = f64::clamp(_r, 0.0, 0.9999) * 256.0;
     let _g = f64::clamp(_g, 0.0, 0.9999) * 256.0;
     let _b = f64::clamp(_b, 0.0, 0.9999) * 256.0;

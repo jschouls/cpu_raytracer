@@ -1,63 +1,126 @@
 use super::math::vector::Vec3;
 use super::ray::Ray;
-use super::scene;
-use super::Camera;
+use super::scene::Scene;
+use super::threadpool::ThreadPool;
 
 extern crate rand;
 use rand::prelude::*;
 
+use std::sync::Arc;
+use std::sync::Mutex;
+use std::sync::RwLock;
 use std::time::Instant;
 
 pub const MAX_RAY_DEPTH: u16 = 50;
-pub const RAYS_PER_PIXEL: u16 = 16;
+pub const RAYS_PER_PIXEL: u16 = 500;
+pub const NUM_THREADS: usize = 4;
+const BYTES_PIXEL: usize = 3;
 
-pub fn render_scene(scene: &scene::Scene, canvas: &mut [u8]) -> Result<(), String> {
-    println!("Start rendering..");
+// struct RenderJob {
+//     index: u32,
+//     screen_position: (u32, u32),
+//     color: u32,
+// }
+
+pub struct RenderSettings {
+    pub screen_width: usize,
+    pub screen_height: usize,
+}
+
+pub fn render_scene(
+    scene: Arc<RwLock<Scene>>,
+    render_setting: &RenderSettings,
+) -> Result<Vec<u8>, String> {
+    // Create jobs
+    println!("Preparing..");
+
     let now = Instant::now();
-    render_to_canvas(&scene, canvas, &scene.camera)?;
+
+    let pool = ThreadPool::new(NUM_THREADS);
+
+    // Create buffer on heap.
+    let buffer_size: usize =
+        render_setting.screen_width * render_setting.screen_height * BYTES_PIXEL;
+
+    let image = {
+        let mut v: Vec<u8> = Vec::with_capacity(buffer_size);
+        unsafe {
+            v.set_len(buffer_size);
+        };
+
+        Arc::new(Mutex::new(v))
+    };
+
+    println!("Start rendering..");
+
+    // for index in 0..(render_setting.screen_width * render_setting.screen_height) {
+    let mut index = 0;
+    for y in 0..super::SCREEN_HEIGHT {
+        for x in 0..super::SCREEN_WIDTH {
+            let arc_scene = scene.clone();
+            let arc_image = image.clone();
+
+            pool.schedule(move || render_pixel(&arc_scene, &arc_image, (x, y, index)));
+            index = index + BYTES_PIXEL;
+        }
+    }
+
+    // Stop workers and wait.
+    drop(pool);
+
     println!(
         "Finished rendering: {} Milliseconds",
         now.elapsed().as_millis()
     );
-    Ok(())
+
+    if let Ok(result) = Arc::try_unwrap(image) {
+        Ok(result.into_inner().unwrap())
+    } else {
+        Err(String::from("Not able to get result."))
+    }
 }
 
-fn render_to_canvas(scene: &scene::Scene, canvas: &mut [u8], cam: &Camera) -> Result<(), String> {
+fn render_pixel(
+    scene: &Arc<RwLock<Scene>>,
+    pixel_data: &Arc<Mutex<Vec<u8>>>,
+    coordinate: (usize, usize, usize),
+) {
     let mut rng = rand::thread_rng();
 
-    let mut index: usize = 0;
-    for y in 0..super::SCREEN_HEIGHT {
-        for x in 0..super::SCREEN_WIDTH {
-            let mut pixel_color = Vec3::zero();
-            for n_rp in 0..RAYS_PER_PIXEL {
-                let rand_coord: (f64, f64) = rng.gen();
-                let mut r = cam.generate_ray(x as f64 + rand_coord.0, y as f64 + rand_coord.1);
-                pixel_color += raytrace(&scene, &mut r, 0);
-            }
-            let (r, g, b) = to_color(pixel_color, RAYS_PER_PIXEL);
-            canvas[index] = r;
-            canvas[index + 1] = g;
-            canvas[index + 2] = b;
-            index = index + 3;
-        }
+    let mut pixel_color = Vec3::zero();
+    for _n_rp in 0..RAYS_PER_PIXEL {
+        let rand_coord: (f64, f64) = rng.gen();
+
+        let mut r = scene.read().unwrap().camera.generate_ray(
+            coordinate.0 as f64 + rand_coord.0,
+            coordinate.1 as f64 + rand_coord.1,
+        );
+        pixel_color += raytrace(&scene, &mut r, 0);
     }
-    Ok(())
+
+    let (r, g, b) = to_color(pixel_color, RAYS_PER_PIXEL);
+
+    let pixel_index: usize = coordinate.2;
+    // We have the result, lock datalist
+    let mut pixel = pixel_data.lock().unwrap();
+    pixel[pixel_index] = r;
+    pixel[pixel_index + 1] = g;
+    pixel[pixel_index + 2] = b;
+
+    //println!("Pixel {pixel_index} ({r},{g},{b}) done calculating");
 }
 
-fn raytrace(scene: &scene::Scene, ray: &mut Ray, depth: u16) -> Vec3 {
+fn raytrace(scene: &Arc<RwLock<Scene>>, ray: &mut Ray, depth: u16) -> Vec3 {
     if depth >= MAX_RAY_DEPTH {
         return Vec3(0.0, 0.0, 0.0);
     }
 
-    for it in scene.objects.iter() {
+    // TODO: BVH for intersecting?
+    for it in scene.read().unwrap().objects.iter() {
         it.intersect(ray, 0.001);
     }
 
     if let Some(hit) = &ray.is_intersected {
-        //let target = hit.position + hit.normal + Vec3::rand_in_unit_sphere();
-        //let target = hit.position + hit.normal + Vec3::rand_unit_vector();
-        //let mut ray = Ray::new(hit.position, target - hit.position);
-        //return raytrace(scene, &mut ray, depth + 1) * 0.5;
         if let Some((attenuation, mut scattered_ray)) = hit.material.scatter(ray) {
             return attenuation * raytrace(scene, &mut scattered_ray, depth + 1);
         }
@@ -67,6 +130,7 @@ fn raytrace(scene: &scene::Scene, ray: &mut Ray, depth: u16) -> Vec3 {
         //return (hit.normal + Vec3(1.0, 1.0, 1.0)) * 0.5;
     }
 
+    //sky
     let t = 0.5 * (ray.direction.1 + 1.0);
     Vec3::fill(1.0) * (1.0 - t) + (Vec3(0.5, 0.7, 1.0) * t)
 }
@@ -79,9 +143,9 @@ fn to_color(vec: Vec3, samples: u16) -> (u8, u8, u8) {
     let _g = (scale * vec.1).sqrt();
     let _b = (scale * vec.2).sqrt();
 
-    let _r = f64::clamp(_r, 0.0, 0.9999) * 256.0;
-    let _g = f64::clamp(_g, 0.0, 0.9999) * 256.0;
-    let _b = f64::clamp(_b, 0.0, 0.9999) * 256.0;
+    let _r = f64::clamp(_r, 0.0, 0.999999) * 256.0;
+    let _g = f64::clamp(_g, 0.0, 0.999999) * 256.0;
+    let _b = f64::clamp(_b, 0.0, 0.999999) * 256.0;
 
     (_r as u8, _g as u8, _b as u8)
 }

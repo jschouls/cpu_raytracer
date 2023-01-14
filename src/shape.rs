@@ -3,9 +3,9 @@ use super::ray::Ray;
 use super::Vec3;
 
 use std::f64;
-use std::rc::Rc;
+use std::sync::Arc;
 
-pub trait Shape {
+pub trait Shape: Sync + Send {
     fn intersect(&self, ray: &mut Ray, tolerance: f64);
 
     // Default impl
@@ -23,15 +23,15 @@ pub trait Shape {
 pub struct Plane {
     normal: Vec3,
     distance: f64,
-    material: Rc<dyn Material>, // Reference count
+    material: Arc<dyn Material>, // Reference count
 }
 
 impl Plane {
-    pub fn new(_normal: Vec3, _distance: f64, _material: &Rc<dyn Material>) -> Self {
+    pub fn new(_normal: Vec3, _distance: f64, _material: &Arc<dyn Material>) -> Self {
         Plane {
             normal: _normal,
             distance: _distance,
-            material: Rc::clone(&_material),
+            material: Arc::clone(&_material),
         }
     }
 }
@@ -42,7 +42,7 @@ impl Shape for Plane {
             / Vec3::dot(ray.direction, self.normal);
 
         if t < ray.travel_distance && t >= tolerance {
-            ray.set_intersection(t, Rc::clone(&self.material), self.normal);
+            ray.set_intersection(t, Arc::clone(&self.material), self.normal);
         }
     }
 
@@ -56,15 +56,15 @@ impl Shape for Plane {
 pub struct Sphere {
     pub position: Vec3,
     pub radius: f64,
-    pub material: Rc<dyn Material>,
+    pub material: Arc<dyn Material>,
 }
 
 impl Sphere {
-    pub fn new(_position: Vec3, _radius: f64, _material: &Rc<dyn Material>) -> Self {
+    pub fn new(_position: Vec3, _radius: f64, _material: &Arc<dyn Material>) -> Self {
         Sphere {
             position: _position,
             radius: _radius,
-            material: Rc::clone(&_material),
+            material: Arc::clone(&_material),
         }
     }
 }
@@ -94,7 +94,7 @@ impl Shape for Sphere {
         if _t < ray.travel_distance {
             let point_intersect = ray.at(_t); //ray.origin + ray.direction * _t;
             let _normal = (point_intersect - self.position) / self.radius;
-            ray.set_intersection(_t, Rc::clone(&self.material), _normal);
+            ray.set_intersection(_t, Arc::clone(&self.material), _normal);
         }
     }
 

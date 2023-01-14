@@ -1,3 +1,5 @@
+use rand::Rng;
+
 use super::light::Light;
 use super::material::{Dielectric, Lambertian, Material, Metal};
 use super::shape::{Plane, Shape, Sphere};
@@ -17,50 +19,50 @@ pub struct Scene {
 //use rand::Rng;
 
 // Create the scene.
+// pub fn create_scene() -> Scene {
+//     // Materials
+
+//     // Reference counter because this can be shared with others and rays.
+//     let floor_material: Arc<dyn Material> = Arc::new(Lambertian {
+//         albedo: Vec3(0.5, 0.5, 0.5),
+//     });
+
+//     let sphere_material: Arc<dyn Material> = Arc::new(Lambertian {
+//         albedo: Vec3(0.1, 0.2, 0.5),
+//     });
+
+//     let metal_material: Arc<dyn Material> = Arc::new(Metal::new(Vec3(0.8, 0.6, 0.2), 0.3));
+
+//     let dielectric_mat: Arc<dyn Material> = Arc::new(Dielectric::new(1.5));
+
+//     let from = Vec3(-2.0, 2.0, 1.0);
+//     let look_at = Vec3(0.0, 0.0, -2.0);
+//     let look_dist = (from - look_at).length();
+//     Scene {
+//         objects: vec![
+//             Box::new(Plane::new(Vec3::up(), 0.5, &floor_material)),
+//             // Box::new(Plane::new(Vec3(0.0, 0.0, 1.0), 5.0, &back_material)),
+//             // Box::new(Plane::new(Vec3(1.0, 0.0, 0.0), 5.0, &back_material)),
+//             // Box::new(Plane::new(Vec3(-1.0, 0.0, 0.0), 5.0, &back_material)),
+//             Box::new(Sphere::new(Vec3(0.0, 0.0, -2.0), 0.5, &sphere_material)),
+//             Box::new(Sphere::new(Vec3(1.0, 0.0, -2.0), 0.5, &metal_material)),
+//             Box::new(Sphere::new(Vec3(-1.0, 0.0, -2.0), 0.5, &dielectric_mat)),
+//             //Box::new(Sphere::new(Vec3(-1.0, 0.0, -2.0), -0.45, &dielectric_mat)),
+//         ],
+//         lights: vec![],
+//         camera: Camera::set(
+//             from,
+//             look_at,
+//             Vec3::up(),
+//             20.0,
+//             800.0 / 600.0,
+//             2.0,
+//             look_dist,
+//         ),
+//     }
+// }
+
 pub fn create_scene() -> Scene {
-    // Materials
-
-    // Reference counter because this can be shared with others and rays.
-    let floor_material: Arc<dyn Material> = Arc::new(Lambertian {
-        albedo: Vec3(0.5, 0.5, 0.5),
-    });
-
-    let sphere_material: Arc<dyn Material> = Arc::new(Lambertian {
-        albedo: Vec3(0.1, 0.2, 0.5),
-    });
-
-    let metal_material: Arc<dyn Material> = Arc::new(Metal::new(Vec3(0.8, 0.6, 0.2), 0.3));
-
-    let dielectric_mat: Arc<dyn Material> = Arc::new(Dielectric::new(1.5));
-
-    let from = Vec3(-2.0, 2.0, 1.0);
-    let look_at = Vec3(0.0, 0.0, -2.0);
-    let look_dist = (from - look_at).length();
-    Scene {
-        objects: vec![
-            Box::new(Plane::new(Vec3::up(), 0.5, &floor_material)),
-            // Box::new(Plane::new(Vec3(0.0, 0.0, 1.0), 5.0, &back_material)),
-            // Box::new(Plane::new(Vec3(1.0, 0.0, 0.0), 5.0, &back_material)),
-            // Box::new(Plane::new(Vec3(-1.0, 0.0, 0.0), 5.0, &back_material)),
-            Box::new(Sphere::new(Vec3(0.0, 0.0, -2.0), 0.5, &sphere_material)),
-            Box::new(Sphere::new(Vec3(1.0, 0.0, -2.0), 0.5, &metal_material)),
-            Box::new(Sphere::new(Vec3(-1.0, 0.0, -2.0), 0.5, &dielectric_mat)),
-            //Box::new(Sphere::new(Vec3(-1.0, 0.0, -2.0), -0.45, &dielectric_mat)),
-        ],
-        lights: vec![],
-        camera: Camera::set(
-            from,
-            look_at,
-            Vec3::up(),
-            20.0,
-            800.0 / 600.0,
-            2.0,
-            look_dist,
-        ),
-    }
-}
-
-/*pub fn create_scene() -> Scene {
     let from = Vec3(13.0, 2.0, 3.0);
     let look_at = Vec3(0.0, 0.0, 0.0);
     let look_dist = (from - look_at).length();
@@ -134,4 +136,4 @@ pub fn create_scene() -> Scene {
     }
 
     scene
-}*/
+}

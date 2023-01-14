@@ -12,7 +12,7 @@ use std::sync::RwLock;
 use std::time::Instant;
 
 pub const MAX_RAY_DEPTH: u16 = 50;
-pub const RAYS_PER_PIXEL: u16 = 16;
+pub const RAYS_PER_PIXEL: u16 = 500;
 pub const NUM_THREADS: usize = 4;
 const BYTES_PIXEL: usize = 3;
 
@@ -90,6 +90,7 @@ fn render_pixel(
     let mut pixel_color = Vec3::zero();
     for _n_rp in 0..RAYS_PER_PIXEL {
         let rand_coord: (f64, f64) = rng.gen();
+
         let mut r = scene.read().unwrap().camera.generate_ray(
             coordinate.0 as f64 + rand_coord.0,
             coordinate.1 as f64 + rand_coord.1,
@@ -142,9 +143,9 @@ fn to_color(vec: Vec3, samples: u16) -> (u8, u8, u8) {
     let _g = (scale * vec.1).sqrt();
     let _b = (scale * vec.2).sqrt();
 
-    let _r = f64::clamp(_r, 0.0, 0.9999) * 256.0;
-    let _g = f64::clamp(_g, 0.0, 0.9999) * 256.0;
-    let _b = f64::clamp(_b, 0.0, 0.9999) * 256.0;
+    let _r = f64::clamp(_r, 0.0, 0.999999) * 256.0;
+    let _g = f64::clamp(_g, 0.0, 0.999999) * 256.0;
+    let _b = f64::clamp(_b, 0.0, 0.999999) * 256.0;
 
     (_r as u8, _g as u8, _b as u8)
 }

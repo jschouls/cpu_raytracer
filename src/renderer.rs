@@ -13,7 +13,7 @@ use std::sync::RwLock;
 use std::time::Instant;
 
 pub const MAX_RAY_DEPTH: u16 = 50;
-pub const RAYS_PER_PIXEL: u16 = 16;
+pub const RAYS_PER_PIXEL: u16 = 500;
 pub const NUM_THREADS: usize = 9;
 const BYTES_PIXEL: usize = 3;
 
@@ -48,7 +48,6 @@ pub fn render_scene(
 
     println!("Start rendering..");
 
-    // for index in 0..(render_setting.screen_width * render_setting.screen_height) {
     let mut index = 0;
     for y in 0..super::SCREEN_HEIGHT {
         for x in 0..super::SCREEN_WIDTH {
@@ -65,7 +64,7 @@ pub fn render_scene(
 
     println!(
         "Finished rendering: {} Milliseconds",
-        now.elapsed().as_millis()
+        now.elapsed().as_secs()
     );
 
     if let Ok(result) = Arc::try_unwrap(image) {

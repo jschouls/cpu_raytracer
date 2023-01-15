@@ -13,6 +13,56 @@ pub struct Scene {
     pub camera: Camera,
 }
 
+pub fn create_scene() -> Scene {
+    let ground_material = material::new(Vec3(0.5, 0.5, 0.5), MaterialType::Lambertian);
+    let sphere_material = material::new(Vec3(0.1, 0.2, 0.5), MaterialType::Lambertian);
+
+    let metal_material = material::new(Vec3(0.8, 0.6, 0.2), MaterialType::Metal { fuzz: 0.3 });
+    let dielectric_mat = material::new(Vec3::zero(), MaterialType::Dielectric { refract: 1.5 });
+
+    let from = Vec3(-6.0, 1.5, 0.70);
+    let look_at = Vec3(0.0, 0.0, -2.0);
+    let look_dist = (from - look_at).length();
+    Scene {
+        objects: vec![
+            shape::new(
+                Vec3(0.0, 0.0, 0.0),
+                ObjectType::Plane {
+                    distance: (0.5),
+                    normal: (Vec3::up()),
+                },
+                &ground_material,
+            ),
+            shape::new(
+                Vec3(0.0, 0.0, -2.0),
+                ObjectType::Sphere { radius: (0.5) },
+                &sphere_material,
+            ),
+            shape::new(
+                Vec3(1.0, 0.0, -2.0),
+                ObjectType::Sphere { radius: (0.5) },
+                &metal_material,
+            ),
+            shape::new(
+                Vec3(-1.0, 0.0, -2.0),
+                ObjectType::Sphere { radius: (0.5) },
+                &dielectric_mat,
+            ),
+        ],
+        lights: vec![],
+        camera: Camera::set(
+            from,
+            look_at,
+            Vec3::up(),
+            20.0,
+            800.0 / 600.0,
+            2.0,
+            look_dist,
+        ),
+    }
+}
+
+/*
 extern crate rand;
 use rand::Rng;
 
@@ -23,9 +73,7 @@ pub fn create_scene() -> Scene {
     let ratio = 800.0 / 600.0;
 
     // Materials
-    /*let ground_material: Arc<dyn Material> = Arc::new(Lambertian {
-        albedo: Vec3(0.5, 0.5, 0.5),
-    });*/
+
     let ground_material = material::new(Vec3(0.5, 0.5, 0.5), MaterialType::Lambertian);
     let material1 = material::new(Vec3::zero(), MaterialType::Dielectric { refract: 1.5 });
     let material2 = material::new(Vec3(0.4, 0.2, 0.1), MaterialType::Lambertian);
@@ -120,3 +168,4 @@ pub fn create_scene() -> Scene {
 
     scene
 }
+*/

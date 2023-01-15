@@ -63,8 +63,8 @@ pub fn render_scene(
     drop(pool);
 
     println!(
-        "Finished rendering: {} Milliseconds",
-        now.elapsed().as_secs()
+        "Finished rendering: {} Seconds",
+        now.elapsed().as_secs_f32()
     );
 
     if let Ok(result) = Arc::try_unwrap(image) {

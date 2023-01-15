@@ -1,5 +1,3 @@
-use rand::Rng;
-
 use super::light::Light;
 use super::material::{Dielectric, Lambertian, Material, Metal};
 use super::shape::{Plane, Shape, Sphere};

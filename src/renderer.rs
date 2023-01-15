@@ -12,7 +12,7 @@ use std::sync::RwLock;
 use std::time::Instant;
 
 pub const MAX_RAY_DEPTH: u16 = 50;
-pub const RAYS_PER_PIXEL: u16 = 500;
+pub const RAYS_PER_PIXEL: u16 = 16;
 pub const NUM_THREADS: usize = 4;
 const BYTES_PIXEL: usize = 3;
 

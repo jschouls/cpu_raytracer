@@ -13,10 +13,6 @@ pub trait Shape: Sync + Send {
         // Default black color
         Vec3(0.0, 0.0, 0.0)
     }
-
-    // fn draw_debug(&self, _canvas: &mut Canvas<Window>) -> Result<(), String> {
-    //     Ok(())
-    // }
 }
 
 // Infinite plane
@@ -96,29 +92,5 @@ impl Shape for Sphere {
             let _normal = (point_intersect - self.position) / self.radius;
             ray.set_intersection(_t, Arc::clone(&self.material), _normal);
         }
-    }
-
-    #[cfg(feature = "draw-debugger")]
-    fn draw_debug(&self, _canvas: &mut Canvas<Window>) -> Result<(), String> {
-        let mut p1 = Vec2(
-            self.radius * 0.0 + self.position.0,
-            self.radius * 1.0 + self.position.2,
-        );
-
-        let mut p2 = Vec2(
-            self.radius * 0.0 + self.position.0,
-            self.radius * 1.0 + self.position.2,
-        );
-
-        let res = 72;
-        for i in 1..res {
-            let rad = (i as f32 * 5.0) * std::f32::consts::PI / 180.0;
-            p2.0 = self.radius * rad.sin() + self.position.0; // x
-            p2.1 = self.radius * rad.cos() + self.position.2; // z
-            scene::draw_line(_canvas, p1, p2, Color::RGB(255, 255, 255))?;
-            p1 = p2;
-        }
-
-        Ok(())
     }
 }

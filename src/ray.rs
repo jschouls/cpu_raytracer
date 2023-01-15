@@ -3,7 +3,7 @@ use super::Vec3;
 use std::sync::Arc;
 
 pub struct IntersectData {
-    pub material: Arc<dyn Material>,
+    pub material: Arc<Material>,
     pub position: Vec3,
     pub normal: Vec3,
     pub front_face: bool,
@@ -31,7 +31,7 @@ impl Ray {
     }
 
     //pub fn set_intersection(&mut self, ray: &Ray, mat: Rc<Material>, normal: Vec3) {
-    pub fn set_intersection(&mut self, t: f64, material: Arc<dyn Material>, normal: Vec3) {
+    pub fn set_intersection(&mut self, t: f64, material: Arc<Material>, normal: Vec3) {
         let _is_inside = Vec3::dot(self.direction, normal) < 0.0;
         self.travel_distance = t;
         self.is_intersected = Some(IntersectData {

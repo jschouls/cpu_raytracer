@@ -1,8 +1,9 @@
+use super::material;
 use super::math::vector::Vec3;
 use super::ray::Ray;
 use super::scene::Scene;
+use super::shape;
 use super::threadpool::ThreadPool;
-
 extern crate rand;
 use rand::prelude::*;
 
@@ -13,14 +14,8 @@ use std::time::Instant;
 
 pub const MAX_RAY_DEPTH: u16 = 50;
 pub const RAYS_PER_PIXEL: u16 = 16;
-pub const NUM_THREADS: usize = 4;
+pub const NUM_THREADS: usize = 9;
 const BYTES_PIXEL: usize = 3;
-
-// struct RenderJob {
-//     index: u32,
-//     screen_position: (u32, u32),
-//     color: u32,
-// }
 
 pub struct RenderSettings {
     pub screen_width: usize,
@@ -106,8 +101,6 @@ fn render_pixel(
     pixel[pixel_index] = r;
     pixel[pixel_index + 1] = g;
     pixel[pixel_index + 2] = b;
-
-    //println!("Pixel {pixel_index} ({r},{g},{b}) done calculating");
 }
 
 fn raytrace(scene: &Arc<RwLock<Scene>>, ray: &mut Ray, depth: u16) -> Vec3 {
@@ -117,17 +110,16 @@ fn raytrace(scene: &Arc<RwLock<Scene>>, ray: &mut Ray, depth: u16) -> Vec3 {
 
     // TODO: BVH for intersecting?
     for it in scene.read().unwrap().objects.iter() {
-        it.intersect(ray, 0.001);
+        //it.intersect(ray, 0.001);
+        shape::intersect(it, ray, 0.001);
     }
 
     if let Some(hit) = &ray.is_intersected {
-        if let Some((attenuation, mut scattered_ray)) = hit.material.scatter(ray) {
+        if let Some((attenuation, mut scattered_ray)) = material::scatter(&hit.material, ray) {
             return attenuation * raytrace(scene, &mut scattered_ray, depth + 1);
         }
 
-        //let target = hit.position + Vec3::rand_in_hemispere(hit.normal);
         return Vec3(0.0, 0.0, 0.0);
-        //return (hit.normal + Vec3(1.0, 1.0, 1.0)) * 0.5;
     }
 
     //sky

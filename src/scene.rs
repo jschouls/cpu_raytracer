@@ -7,13 +7,14 @@ use super::Vec3;
 use crate::material;
 use crate::math::vector::Vector;
 
+#[derive(Clone)]
 pub struct Scene {
     pub objects: Vec<Object>,
     pub lights: Vec<Light>,
     pub camera: Camera,
 }
 
-pub fn create_scene() -> Scene {
+/*pub fn create_scene() -> Scene {
     let ground_material = material::new(Vec3(0.5, 0.5, 0.5), MaterialType::Lambertian);
     let sphere_material = material::new(Vec3(0.1, 0.2, 0.5), MaterialType::Lambertian);
 
@@ -55,14 +56,13 @@ pub fn create_scene() -> Scene {
             look_at,
             Vec3::up(),
             20.0,
-            800.0 / 600.0,
-            2.0,
+            super::SCREEN_WIDTH as f64 / super::SCREEN_HEIGHT as f64,
+            0.7,
             look_dist,
         ),
     }
-}
+}*/
 
-/*
 extern crate rand;
 use rand::Rng;
 
@@ -70,7 +70,7 @@ pub fn create_scene() -> Scene {
     let from = Vec3(13.0, 2.0, 3.0);
     let look_at = Vec3(0.0, 0.0, 0.0);
     let look_dist = (from - look_at).length();
-    let ratio = 800.0 / 600.0;
+    let ratio = super::SCREEN_WIDTH as f64 / super::SCREEN_HEIGHT as f64;
 
     // Materials
 
@@ -168,4 +168,3 @@ pub fn create_scene() -> Scene {
 
     scene
 }
-*/

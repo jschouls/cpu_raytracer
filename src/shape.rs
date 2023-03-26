@@ -6,13 +6,13 @@ use std::f64;
 use std::sync::Arc;
 
 //
-
+#[derive(Clone)]
 pub struct Object {
     position: Vec3,
     object_type: ObjectType,
     material: Arc<Material>, // TODO: refactor
 }
-
+#[derive(Clone)]
 pub enum ObjectType {
     Sphere { radius: f64 },
     Plane { distance: f64, normal: Vec3 },

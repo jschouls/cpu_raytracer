@@ -17,15 +17,14 @@ use math::vector::Vec3;
 use std::fs::File;
 use std::io::BufWriter;
 use std::path::Path;
-use std::sync::{Arc, RwLock};
 
 use renderer::RenderSettings;
 
 extern crate libc;
 extern crate png;
 
-pub const SCREEN_WIDTH: usize = 800;
-pub const SCREEN_HEIGHT: usize = 600;
+pub const SCREEN_WIDTH: usize = 1200;
+pub const SCREEN_HEIGHT: usize = 800;
 
 #[allow(dead_code)]
 fn main() -> Result<(), std::io::Error> {
@@ -35,7 +34,7 @@ fn main() -> Result<(), std::io::Error> {
     };
 
     // Scene is just a read only data object.
-    let scene = Arc::new(RwLock::new(scene::create_scene()));
+    let scene = scene::create_scene();
 
     // Create or overwrite file.
     let path = Path::new(r"other\images\progress.png");

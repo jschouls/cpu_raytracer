@@ -1,22 +1,25 @@
+use super::scene::Scene;
+use std::collections::HashMap;
 use std::sync::{mpsc, Arc, Mutex};
 use std::thread;
 
+type Coordinate = (usize, usize, usize);
+type Job = Box<dyn Fn(&Scene, (usize, usize, usize)) -> (u8, u8, u8) + Send + 'static>;
+
 pub enum Message {
-    NewJob(Job),
+    NewJob(Coordinate, Job),
     Terminate,
 }
 
 pub struct ThreadPool {
-    workers: Vec<Worker>,
+    pub workers: Vec<Worker>,
     sender: mpsc::Sender<Message>,
 }
-
-type Job = Box<dyn FnOnce() + Send + 'static>;
 
 /* Thread pool to distribute the calculations over threads */
 
 impl ThreadPool {
-    pub fn new(size: usize) -> ThreadPool {
+    pub fn new(size: usize, scene: Scene) -> ThreadPool {
         assert!(size > 0);
 
         let (sender, receiver) = mpsc::channel();
@@ -25,26 +28,23 @@ impl ThreadPool {
         let mut workers = Vec::with_capacity(size);
 
         for id in 0..size {
-            workers.push(Worker::new(id, Arc::clone(&receiver)));
+            workers.push(Worker::new(id, Arc::clone(&receiver), scene.clone()));
         }
 
         ThreadPool { workers, sender }
     }
 
-    pub fn schedule<F>(&self, f: F)
+    pub fn schedule<F>(&self, coordinate: Coordinate, f: F)
     where
-        F: FnOnce() + Send + 'static,
+        F: Fn(&Scene, Coordinate) -> (u8, u8, u8) + Send + 'static,
     {
         let job = Box::new(f);
 
-        self.sender.send(Message::NewJob(job)).unwrap();
+        self.sender.send(Message::NewJob(coordinate, job)).unwrap();
     }
-}
 
-impl Drop for ThreadPool {
-    fn drop(&mut self) {
+    pub fn wait_all(&mut self) {
         println!("Send Terminate message to all workers.");
-
         for _ in &self.workers {
             self.sender.send(Message::Terminate).unwrap();
         }
@@ -60,24 +60,31 @@ impl Drop for ThreadPool {
 }
 
 pub struct Worker {
-    id: usize,
-    handle: Option<thread::JoinHandle<()>>,
+    pub id: usize,
+    pub handle: Option<thread::JoinHandle<()>>,
+    pub results: Arc<Mutex<HashMap<usize, (u8, u8, u8)>>>, // index -> (r, g, b)
 }
 
 impl Worker {
-    pub fn new(id: usize, receiver: Arc<Mutex<mpsc::Receiver<Message>>>) -> Worker {
+    pub fn new(
+        id: usize,
+        receiver: Arc<Mutex<mpsc::Receiver<Message>>>,
+        arc_scene: Scene,
+    ) -> Worker {
+        // Create references
+        let results_map = Arc::new(Mutex::new(HashMap::new()));
+        let scene = arc_scene.clone();
+        let map = Arc::clone(&results_map);
         let thread = thread::spawn(move || loop {
             let message = receiver.lock().unwrap().recv().unwrap();
-
             match message {
-                Message::NewJob(job) => {
-                    //println!("Worker {id} got a job; executing.");
+                Message::NewJob(coordinate, job) => {
+                    let (r, g, b) = job(&scene, (coordinate.0, coordinate.1, coordinate.2));
 
-                    job();
+                    // Add result to map.
+                    map.lock().unwrap().insert(coordinate.2, (r, g, b));
                 }
                 Message::Terminate => {
-                    //println!("Worker {id} was told to terminate.");
-
                     break;
                 }
             }
@@ -86,6 +93,7 @@ impl Worker {
         Worker {
             id,
             handle: Some(thread),
+            results: Arc::clone(&results_map),
         }
     }
 }

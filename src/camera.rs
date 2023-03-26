@@ -2,20 +2,7 @@ use super::ray::Ray;
 use super::Vec3;
 use std::f64;
 
-// Ratio needs to change when resolution also change.
-// const CAMERA_SCREEN_SIZE_HEIGHT: f64 = 0.3;
-// const CAMERA_SCREEN_SIZE_WIDTH: f64 = 0.4;
-
-/**
- * viewPlane points
- *  0-----------1
- *  |           |
- *  |     c     |
- *  |           |
- *  2-----------3
- */
-
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Camera {
     pub position: Vec3,
     pub direction: Vec3,
